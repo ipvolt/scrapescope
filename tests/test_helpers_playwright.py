@@ -1586,6 +1586,10 @@ def test_fulfilled_aborted_and_blocked_requests_are_not_network_requests_in_chro
                 s.onload = s.onerror = () => done();
                 document.head.appendChild(s);
             })""")
+            # Let every real request the page started finish before the context closes; a request
+            # still in flight at close is recorded as failed, which on a slow machine would put a
+            # spurious "failed" into the status histogram.
+            page.wait_for_load_state("networkidle")
             page.wait_for_timeout(300)
             context.close()
         finally:
