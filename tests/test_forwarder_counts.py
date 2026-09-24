@@ -111,6 +111,24 @@ def test_socks_negotiation_is_14_bytes_down(fresh_world: TestWorld) -> None:
     assert record.method_selected == 0x02 and record.auth_ok
 
 
+def _forwarded_connect_head_size(world: TestWorld, client: str, url: str) -> int:
+    """This client's CONNECT head as the meter forwards it to an HTTP CONNECT upstream, without Proxy-Authorization.
+
+    Measured, not assumed: the head differs between clients and even between
+    Python versions of the same client (3.12's ``http.client`` adds ``Host`` to
+    CONNECT, 3.11's sends ``CONNECT host:port HTTP/1.0`` and a blank line, 38
+    bytes for ``origin-a.test:443``, below the 63-byte minimal HTTP/1.1 head).
+    """
+    upstream = world.http_upstream
+    with running(make_config(upstream.url)) as fw:
+        assert fetch(world, client, fw.url, url)[0] == 200
+        snap = settle(world, fw)
+    (tunnel,) = snap.target_tunnels()
+    assert tunnel.kind == "connect" and tunnel.route == "http-connect"
+    assert tunnel.connect_request_bytes > tunnel.proxy_authorization_bytes > 0
+    return tunnel.connect_request_bytes - tunnel.proxy_authorization_bytes
+
+
 @pytest.mark.parametrize("client", CLIENTS)
 @pytest.mark.parametrize("url", [HTTPS_URL, HTTP_URL], ids=["connect", "plain-http"])
 def test_direct_mode_counts_equal_origin(fresh_world: TestWorld, client: str, url: str) -> None:
@@ -126,14 +144,16 @@ def test_direct_mode_counts_equal_origin(fresh_world: TestWorld, client: str, ur
     assert len(target) == totals["connections"]
     assert sum(t.upstream_bytes_sent for t in target) == totals["bytes_in"]
     assert sum(t.upstream_bytes_received for t in target) == totals["bytes_out"]
+    # meas2-9: the request estimate is this client's own CONNECT head as it would reach an HTTP CONNECT
+    # provider, without Proxy-Authorization. Measure that head by sending the same request through the
+    # fixture upstream (after the origin totals above, which this second fetch would add to).
+    forwarded_head = _forwarded_connect_head_size(fresh_world, client, url) if scheme == "https" else 0
     for tunnel in target:
         assert tunnel.route == "direct"
         assert tunnel.negotiation_bytes_sent == tunnel.negotiation_bytes_received == 0
         if tunnel.kind == "connect":
-            # meas2-9: the request estimate is this client's own CONNECT head (at least the minimal one)
-            minimal_request, reply = synthetic_connect_sizes("origin-a.test", 443)
-            assert tunnel.synthetic_negotiation_bytes_sent >= minimal_request
-            assert tunnel.synthetic_negotiation_bytes_received == reply
+            assert tunnel.synthetic_negotiation_bytes_sent == forwarded_head > 0
+            assert tunnel.synthetic_negotiation_bytes_received == synthetic_connect_sizes("origin-a.test", 443)[1]
         else:
             assert tunnel.synthetic_negotiation_bytes_sent == tunnel.synthetic_negotiation_bytes_received == 0
     t = snap.totals()

@@ -392,6 +392,9 @@ class Response:
     length: int | None = None
     #: "length" (Content-Length), "chunked" or "close" (close-delimited).
     framing: str = "length"
+    #: Length framing only: after exactly this many body bytes the origin stops
+    #: writing and waits for the client to go away, then closes (aborted transfers).
+    stall_after: int | None = None
     cache: str = "no-store"
     #: Value for the Server header (defaults to "fixture-origin").
     server: str | None = None
@@ -416,10 +419,15 @@ def _common(req: Request) -> Response | None:
             size = int(q.get("size", ["1048576"])[0])
             chunk = int(q.get("chunk", ["65536"])[0])
             delay = int(q.get("delay_ms", ["0"])[0]) / 1000.0
+            stall_after = int(q["stall_after"][0]) if "stall_after" in q else None
         except ValueError:
             return _text(400, "bad size\n")
         size = max(0, min(size, 8 * 1024**3))
-        return Response(200, "application/octet-stream", lambda: big_stream(size, chunk, delay), length=size)
+        if stall_after is not None and not 0 <= stall_after < size:
+            return _text(400, "stall_after must be below size\n")
+        return Response(
+            200, "application/octet-stream", lambda: big_stream(size, chunk, delay), length=size, stall_after=stall_after
+        )
     if path == "/chunked":
         n = int(q.get("n", ["4"])[0])
         size = max(1, min(int(q.get("size", ["1000"])[0]), 65536))

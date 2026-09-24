@@ -444,9 +444,16 @@ scrapescope generates, so a file with any other id fails validation.
   without your cookies or profile. The site's JavaScript runs as it would in a
   browser. Playwright starts Chromium without its OS-level sandbox by default
   (`chromium_sandbox=False`), so `find` asks for the sandbox explicitly. Where
-  the sandbox cannot start (some containers without user namespaces),
-  scrapescope runs Chromium without it and the result carries a warning. Load
-  only pages you would open in a normal browser.
+  the sandbox cannot start, which on Linux means no unprivileged user
+  namespaces (containers, Ubuntu 24.04's AppArmor default, GitHub's
+  `ubuntu-24.04` runners), `find` launches Chromium a second time without the
+  sandbox, loads the page anyway and says so: the result's warnings, printed
+  under `warnings:` and stored in the report, carry "Chromium's OS sandbox
+  could not start on this machine ..., so the page was loaded in Chromium
+  without it; load only pages you trust". The fallback is automatic; there is
+  no option to fail instead. Load only pages you would open in a normal
+  browser, and on such a machine treat the page's JavaScript as running with
+  no more isolation than any other process of your user.
 - `find` launches Chromium with
   `--force-webrtc-ip-handling-policy=disable_non_proxied_udp`, so WebRTC may
   use proxied connections only: a page cannot send STUN or other UDP from this

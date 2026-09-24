@@ -159,7 +159,9 @@ def _short_value_warning(result: FindResult, values: Sequence[str]) -> str | Non
             return None
     return short_value_note(short)
 SANDBOX_WARNING = (
-    "Chromium could not start with its OS sandbox here and ran without it; load only pages you trust"
+    "Chromium's OS sandbox could not start on this machine (Linux without unprivileged user namespaces, "
+    "for example a container or Ubuntu 24.04's AppArmor default), so the page was loaded in Chromium "
+    "without it; load only pages you trust"
 )
 BILLED_BASIS_NOTE = (
     "billed-basis bytes = encoded body + response headers + request headers + one new TLS "

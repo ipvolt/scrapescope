@@ -92,3 +92,31 @@ def chromium_unavailable_reason(full_chromium: bool = False) -> str | None:
     except Exception as exc:  # e.g. a running asyncio loop in this thread
         return f"Playwright could not start: {type(exc).__name__}"
     return None
+
+
+@functools.lru_cache(maxsize=1)
+def chromium_sandbox_unavailable_reason() -> str | None:
+    """None when Chromium starts with its OS sandbox here, else why the sandboxed launch failed.
+
+    ``find`` launches with ``chromium_sandbox=True`` and falls back to no
+    sandbox, with a warning, only when that launch fails: on Linux without
+    unprivileged user namespaces (containers, Ubuntu 24.04's AppArmor default,
+    GitHub's ubuntu-24.04 runners) Chromium exits with "No usable sandbox!".
+    This probe makes the same sandboxed launch once (cached), behind a dead
+    loopback proxy, so tests can expect the fallback note exactly on machines
+    where the sandbox is genuinely unavailable. Call it only where
+    :func:`chromium_unavailable_reason` returned None.
+    """
+    from playwright.sync_api import Error as PlaywrightError
+    from playwright.sync_api import sync_playwright
+
+    dead_proxy = {"server": f"http://127.0.0.1:{free_port()}"}
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(chromium_sandbox=True, proxy=dead_proxy)
+            browser.close()
+    except PlaywrightError as exc:
+        lines = [line.strip() for line in str(exc).splitlines() if line.strip()]
+        detail = next((line for line in lines if "sandbox" in line.lower()), lines[0] if lines else "")
+        return f"Chromium could not start with its OS sandbox: {detail[:200]}"
+    return None

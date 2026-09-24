@@ -652,6 +652,22 @@ def _load_shop(page: Any, path: str = "/") -> None:
     page.wait_for_timeout(300)  # let the last requestfinished events arrive
 
 
+#: Starts a fetch of the (%r-quoted) path and counts the body bytes received so far in ``window.__received``.
+_COUNTING_FETCH_JS = """
+window.__received = 0;
+fetch(%r).then(r => {
+  const reader = r.body.getReader();
+  const pump = () => reader.read().then(({done, value}) => {
+    if (done) return;
+    window.__received += value.byteLength;
+    return pump();
+  });
+  return pump();
+}).catch(() => 0);
+1
+"""
+
+
 def _by_path(events: list[RequestEvent], host: str, path: str) -> list[RequestEvent]:
     return [e for e in events if e.host == host and e.path == path]
 
@@ -1451,40 +1467,58 @@ def test_fetch_aborted_by_navigation_is_written_at_close_and_its_bytes_stay_unre
     """
     from playwright.sync_api import sync_playwright
 
-    from scrapescope.attribution.core import UNREPORTED_TYPE
+    from scrapescope.attribution.core import (
+        OVERHEAD_PER_TUNNEL_BYTES,
+        OVERHEAD_SHARE,
+        UNKNOWN_HEADERS_BYTES,
+        UNREPORTED_TYPE,
+    )
     from scrapescope.model import compute_what_if
 
     monkeypatch.setenv(ENV_KEEP_URLS, "1")
     started = time.time()
     kwargs = chromium_launch_kwargs(fresh_world, server=fresh_world.http_upstream_noauth.server)
+    # The origin sends exactly this much of a 50 MB body and then stalls until the client goes away, and
+    # the page counts what arrived, so the navigation aborts a transfer of a known size on every machine
+    # instead of whatever a fixed sleep let through (608 kB on a slow runner, 5 MB on a fast one).
+    stall_after = 2_000_000
     with sync_playwright() as p:
         browser = p.chromium.launch(**kwargs)
         try:
             context = ssp.instrument(browser.new_context(**CONTEXT_KWARGS))
             page = context.new_page()
             _load_shop(page)
-            page.evaluate("fetch('/big.bin?size=50000000&chunk=65536&delay_ms=20')"
-                          ".then(r => r.arrayBuffer()).catch(() => 0); 1")
-            page.wait_for_timeout(1500)
+            page.evaluate(_COUNTING_FETCH_JS % f"/big.bin?size=50000000&stall_after={stall_after}")
+            page.wait_for_function(f"window.__received >= {stall_after}", timeout=60_000)
             _load_shop(page, "/product/2")
             context.close()
         finally:
             browser.close()
     assert fresh_world.wait_idle(15)
     events = _events(events_file)
-    (big,) = _by_path([e for e in events if isinstance(e, RequestEvent)], "origin-a.test", "/big.bin")
+    requests = [e for e in events if isinstance(e, RequestEvent)]
+    (big,) = _by_path(requests, "origin-a.test", "/big.bin")
     assert big.failed and big.encoded_body_bytes is None and big.reported_bytes == 0
     snapshot = _snapshot(_tunnels_from_upstream(fresh_world.http_upstream_noauth.records()), started)
     result = attribute(snapshot, events, _fixture_catalogs())
     row = next(h for h in result.hosts if h.host == "origin-a.test")
-    assert row.allocated_by_type[UNREPORTED_TYPE] > 1_000_000  # the aborted transfer, not the images
+    host_requests = [e for e in requests if e.host == "origin-a.test" and e.hit_network]
+    reported = sum(e.reported_bytes for e in host_requests)
+    # The host's tunnels carried the whole aborted transfer beyond every reported byte...
+    assert row.bytes_with_connect - reported >= stall_after
+    # ...and attribution shows it as unreported (less at most the overhead allowance it grants the reported
+    # requests, bounded here with every host tunnel and request counted) rather than scaling up the images.
+    host_tunnels = [t for t in snapshot.tunnels if t.host == "origin-a.test"]
+    allowance = (OVERHEAD_PER_TUNNEL_BYTES * len(host_tunnels) + UNKNOWN_HEADERS_BYTES * len(host_requests)
+                 + int(reported * OVERHEAD_SHARE))
+    assert row.allocated_by_type[UNREPORTED_TYPE] >= stall_after - allowance > 1_000_000
     image = next(t for t in result.types if t.type == "image")
     assert image.allocated_bytes < 1.3 * image.reported_bytes + 200_000
     (block,) = [w for w in compute_what_if(result, snapshot.totals(), _fixture_catalogs())
                 if w.id == "block-images-media-fonts"]
     assert block.share < 0.5
     assert any("unreported" in w for w in result.warnings)
-    _assert_private(events_file, "size=")
+    _assert_private(events_file, "size=", "stall_after=")
 
 
 def test_unfinished_requests_of_a_context_never_closed_are_written_at_exit(events_file: Path) -> None:

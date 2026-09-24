@@ -459,6 +459,34 @@ def test_big_bin_and_openai(fresh_world: TestWorld, https_client: httpx.Client) 
         assert (host, 443) in fresh_world.hosts_map
 
 
+def test_big_bin_stall_after_sends_exactly_that_much_then_waits_for_the_client(fresh_world: TestWorld) -> None:
+    """``stall_after=S``: S body bytes arrive, nothing more until the client closes, and the origin records S."""
+    ip, port = fresh_world.hosts_map[("origin-a.test", 80)]
+    size, stall_after = 500_000, 150_000
+    with socket.create_connection((ip, port), timeout=10) as sock:
+        sock.sendall(f"GET /big.bin?size={size}&stall_after={stall_after} HTTP/1.1\r\nHost: origin-a.test\r\n\r\n".encode())
+        data = b""
+        while b"\r\n\r\n" not in data or len(data) - data.index(b"\r\n\r\n") - 4 < stall_after:
+            chunk = sock.recv(65536)
+            assert chunk, "the origin closed before sending stall_after bytes"
+            data += chunk
+        head, _, body = data.partition(b"\r\n\r\n")
+        assert f"Content-Length: {size}".encode() in head
+        assert body == b"".join(site.big_stream(stall_after))  # exactly stall_after bytes, the stream's own
+        sock.settimeout(1.0)
+        with pytest.raises(TimeoutError):  # the origin stalls: not one byte more while the client stays
+            sock.recv(1)
+    assert fresh_world.wait_idle(10)  # the client's close ends the stall and the connection
+    origin = fresh_world.origin("origin-a.test", "http")
+    (record,) = origin.requests()
+    assert record.path == "/big.bin" and record.response_body_bytes == stall_after
+    (conn,) = origin.connections()
+    assert conn.closed and conn.bytes_out >= stall_after
+    ip, port = fresh_world.hosts_map[("origin-a.test", 80)]
+    assert requests.get(f"http://{ip}:{port}/big.bin?size=10&stall_after=10", headers={"Host": "origin-a.test"},
+                        timeout=10).status_code == 400  # stall_after must leave something unsent
+
+
 def test_http_origin_edge_cases(world: TestWorld) -> None:
     """Chunked, close-delimited, ETag/304 and Expect: 100-continue on the plain origin."""
     ip, port = world.hosts_map[("origin-a.test", 80)]

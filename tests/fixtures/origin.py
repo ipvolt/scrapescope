@@ -17,6 +17,7 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import hashlib
+import select
 import socket
 import ssl
 import threading
@@ -30,6 +31,8 @@ from ._aio import BackgroundLoop, close_writer, splice, wait_until
 from .common import Registry
 
 HANDLER_IDLE_TIMEOUT = 900.0
+#: Longest a ``stall_after`` response waits for the client to go away before closing on its own.
+STALL_LIMIT_S = 60.0
 
 
 @dataclass
@@ -251,12 +254,35 @@ class _Handler(BaseHTTPRequestHandler):
                 self.end_headers()
                 if not no_body:
                     for piece in payload():
+                        if resp.stall_after is not None and written + len(piece) >= resp.stall_after:
+                            piece = piece[: resp.stall_after - written]
+                            self.wfile.write(piece)
+                            written += len(piece)
+                            self._stall_until_peer_closes()
+                            break
                         self.wfile.write(piece)
                         written += len(piece)
             with contextlib.suppress(Exception):
                 self.wfile.flush()
         finally:
             origin._update_request(record, written)
+
+    def _stall_until_peer_closes(self, limit_s: float = STALL_LIMIT_S) -> None:
+        """Stop writing mid-body and wait until the client goes away (or ``limit_s`` passes), then close.
+
+        The handler's socket is the plain TCP leg behind the relay (TLS ends there), and
+        the client never sends more on a connection with a response in flight, so the
+        socket turning readable means EOF: the client, or the relay on its behalf, closed.
+        The response stays incomplete and ``close_connection`` ends the connection.
+        """
+        with contextlib.suppress(Exception):
+            self.wfile.flush()
+        self.close_connection = True
+        deadline = time.monotonic() + limit_s
+        while (remaining := deadline - time.monotonic()) > 0:
+            readable, _, _ = select.select([self.connection], [], [], min(remaining, 1.0))
+            if readable:
+                return
 
 
 class OriginServer:

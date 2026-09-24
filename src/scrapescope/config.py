@@ -410,8 +410,11 @@ def synthetic_connect_sizes(host: str, port: int) -> tuple[int, int]:
     opens each CONNECT tunnel with these sizes and then replaces the request
     size with the client's own CONNECT head (without Proxy-Authorization),
     which is usually larger: Chromium sends Host, Proxy-Connection and its
-    User-Agent (about 236 bytes). Provider credentials would add their
-    ``Proxy-Authorization`` line on top (often 50-150 bytes).
+    User-Agent (about 236 bytes). It can also be smaller: Python 3.11's
+    ``http.client`` sends ``CONNECT host:port HTTP/1.0`` and a blank line
+    without ``Host`` (38 bytes for ``origin-a.test:443``), forwarded as is.
+    Provider credentials would add their ``Proxy-Authorization`` line on top
+    (often 50-150 bytes).
     """
     authority = format_authority(host, port)
     request = f"CONNECT {authority} HTTP/1.1\r\nHost: {authority}\r\n\r\n".encode("ascii")

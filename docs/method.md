@@ -146,7 +146,10 @@ had with a provider:
   `Proxy-Authorization` line. Chromium's is about 236 bytes (`Host`,
   `Proxy-Connection: keep-alive` and its `User-Agent`); a minimal head
   (`CONNECT host:port HTTP/1.1`, `Host` and a blank line) is 63 bytes for
-  `origin-a.test:443`;
+  `origin-a.test:443`. A client that sends less is estimated at what it sent:
+  Python 3.11's `http.client` (and so `requests`) sends
+  `CONNECT host:port HTTP/1.0` and a blank line without `Host`, 38 bytes for
+  the same authority, which scrapescope forwards unchanged (3.12 adds `Host`);
 - the reply `HTTP/1.1 200 Connection established` with a blank line (39
   bytes).
 
@@ -568,8 +571,10 @@ the with-CONNECT total.
 `scrapescope find URL --value V [--value V ...]` works as follows.
 
 1. **Load and classify.** Headless Chromium (through Playwright, with its OS
-   sandbox where available, and with WebRTC restricted to proxied connections
-   by `--force-webrtc-ip-handling-policy=disable_non_proxied_udp`) loads the
+   sandbox where it can start and otherwise without it plus a warning, see
+   [security.md](security.md#find), and with WebRTC restricted to proxied
+   connections by `--force-webrtc-ip-handling-policy=disable_non_proxied_udp`)
+   loads the
    URL once through the forwarder, with Chromium's default user agent and no
    spoofing, then waits a bounded time for the network to go quiet. A fast
    navigation error gets one retry, except errors a retry cannot fix
