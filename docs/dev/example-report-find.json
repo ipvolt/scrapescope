@@ -1,0 +1,266 @@
+{
+  "schema_version": 1,
+  "tool_version": "0.1.0",
+  "command": "find",
+  "catalog_versions": {
+    "background": "2026.09.23",
+    "challenges": "2026.09.23",
+    "direct": "2026.09.23"
+  },
+  "started_at": "2026-09-23T10:00:00.000Z",
+  "ended_at": "2026-09-23T10:00:08.000Z",
+  "mode": "direct",
+  "gb_unit": "GB",
+  "labels": {
+    "totals": "tunnel-measured",
+    "allocated": "allocated",
+    "hook": "hook-reported",
+    "cost": "estimated billable transfer",
+    "unattributed": "find page load and --verify replay"
+  },
+  "totals": {
+    "with_connect": 446518,
+    "without_connect": 446200,
+    "bytes_sent": 12000,
+    "bytes_received": 434200,
+    "tunnels": 3,
+    "failed_tunnels": 0,
+    "denied_tunnels": 0,
+    "with_connect_estimated": true,
+    "connections": 3
+  },
+  "budget": {
+    "limit_bytes": null,
+    "max_tunnel_bytes": null,
+    "counted_bytes": 446200,
+    "tripped": false
+  },
+  "units": {
+    "count": 0,
+    "source": "none",
+    "low_sample_warning": false
+  },
+  "browser_launches": 1,
+  "bytes_before_first_navigation": null,
+  "per_unit": null,
+  "hosts": [
+    {
+      "host": "origin-a.test",
+      "ports": [
+        443
+      ],
+      "tunnels": 2,
+      "failed_tunnels": 0,
+      "denied_tunnels": 0,
+      "bytes_sent": 10300,
+      "bytes_received": 413200,
+      "bytes_with_connect": 423712,
+      "bytes_without_connect": 423500,
+      "requests": 0,
+      "buckets": {
+        "unattributed": {
+          "tunnels": 2,
+          "bytes": 423712
+        }
+      },
+      "allocated_by_type": {},
+      "background_id": null,
+      "paths": []
+    },
+    {
+      "host": "origin-c.test",
+      "ports": [
+        443
+      ],
+      "tunnels": 1,
+      "failed_tunnels": 0,
+      "denied_tunnels": 0,
+      "bytes_sent": 1700,
+      "bytes_received": 21000,
+      "bytes_with_connect": 22806,
+      "bytes_without_connect": 22700,
+      "requests": 0,
+      "buckets": {
+        "unattributed": {
+          "tunnels": 1,
+          "bytes": 22806
+        }
+      },
+      "allocated_by_type": {},
+      "background_id": null,
+      "paths": []
+    }
+  ],
+  "types": [],
+  "buckets": {
+    "attributed": 0,
+    "preconnect_idle": 0,
+    "before_attach": 0,
+    "unattributed": 446518,
+    "background": {}
+  },
+  "non_target": [],
+  "status_histogram": {},
+  "success": null,
+  "find": [
+    {
+      "status": "found",
+      "target_host": "origin-a.test",
+      "target_path": null,
+      "values_count": 2,
+      "short_value_warning": false,
+      "challenge": {
+        "blocked": false,
+        "vendor_id": null,
+        "vendor_name": null,
+        "signals": [],
+        "status": 200
+      },
+      "matches": [
+        {
+          "rank": 1,
+          "host": "origin-a.test",
+          "port": 443,
+          "scheme": "https",
+          "path": null,
+          "method": "GET",
+          "resource_type": "fetch",
+          "status": 200,
+          "mime_type": "application/json",
+          "all_values": true,
+          "values_matched": 2,
+          "match_kinds": [
+            "exact",
+            "variant:number-format"
+          ],
+          "locations": [
+            "fetch",
+            "json-key:product.name",
+            "json-key:product.price"
+          ],
+          "encoded_body_bytes": 1106,
+          "response_header_bytes": 0,
+          "request_header_bytes": 0,
+          "tls_handshake_estimate": 7200,
+          "billed_basis_bytes": 8306,
+          "flags": {
+            "sent_cookies": false,
+            "sent_authorization": false,
+            "random_query_token": false,
+            "third_party": false,
+            "non_get": false,
+            "sent_token_header": false
+          },
+          "code_eligible": true,
+          "code_ineligible_reason": null,
+          "content_encoding": "br",
+          "multiplexed": true,
+          "locations_by_value": [
+            [
+              "json-key:product.name"
+            ],
+            [
+              "json-key:product.price"
+            ]
+          ]
+        },
+        {
+          "rank": 2,
+          "host": "origin-a.test",
+          "port": 443,
+          "scheme": "https",
+          "path": null,
+          "method": "GET",
+          "resource_type": "document",
+          "status": 200,
+          "mime_type": "text/html",
+          "all_values": true,
+          "values_matched": 2,
+          "match_kinds": [
+            "exact",
+            "exact"
+          ],
+          "locations": [
+            "document",
+            "embedded:ld-json",
+            "json-key:name",
+            "html-text",
+            "json-key:offers.price"
+          ],
+          "encoded_body_bytes": 9402,
+          "response_header_bytes": 0,
+          "request_header_bytes": 0,
+          "tls_handshake_estimate": 7200,
+          "billed_basis_bytes": 16602,
+          "flags": {
+            "sent_cookies": true,
+            "sent_authorization": false,
+            "random_query_token": false,
+            "third_party": false,
+            "non_get": false,
+            "sent_token_header": false
+          },
+          "code_eligible": false,
+          "code_ineligible_reason": "sent cookies",
+          "content_encoding": "br",
+          "multiplexed": true,
+          "locations_by_value": [
+            [
+              "embedded:ld-json",
+              "json-key:name",
+              "html-text"
+            ],
+            [
+              "embedded:ld-json",
+              "json-key:offers.price",
+              "html-text"
+            ]
+          ]
+        }
+      ],
+      "coverage": {
+        "inspected": 9,
+        "skipped": {
+          "binary": 14,
+          "challenge": 1
+        },
+        "line": "searched 9 inspected responses; skipped: 14 binary, 1 challenge page (not searched; see warnings)"
+      },
+      "verify": {
+        "replays": "yes",
+        "status": 200,
+        "received_bytes": 3318,
+        "reason": null,
+        "replay_billed_basis_bytes": 11106
+      },
+      "responses_total": 24,
+      "page_reported_bytes": 412870,
+      "warnings": [
+        "1 response was a challenge page (Cloudflare) although the page itself loaded; not searched (counted as skipped: challenge page), so a value that request should have carried may be missing",
+        "compressed with br or zstd in the browser: rank 1 (br), rank 2 (br); billed-basis uses that size, and a client that only accepts gzip or deflate (curl without brotli/zstd, httpx without its brotli/zstd extras) receives a larger body",
+        "the --verify replay of rank 1 moved about 11,106 billed-basis bytes (3,318 body bytes, no compression; it accepted: gzip, deflate) versus 8,306 for the browser's copy (1,106 body bytes, br)"
+      ]
+    }
+  ],
+  "budget_events": [],
+  "warnings": [
+    "sizing mode: no upstream; the with-CONNECT figure is estimated; exit location, blocking and retries of a real upstream are not reproduced"
+  ],
+  "incomplete": false,
+  "bypass": {
+    "hosts": [],
+    "requests": 0
+  },
+  "what_if": [],
+  "fixes": [],
+  "cost": null,
+  "refused": {},
+  "tunnel_failures": {},
+  "accept_limit_errors": 0,
+  "helper_events": {
+    "attach": 0,
+    "launch": 0,
+    "request": 0,
+    "dropped": 0
+  }
+}

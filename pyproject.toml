@@ -1,0 +1,90 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "scrapescope"
+dynamic = ["version"]
+description = "A local metering proxy that shows where a scraper's or browser agent's proxy bytes go."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE", "NOTICE"]
+authors = [{ name = "ipvolt" }]
+keywords = ["proxy", "scraping", "bandwidth", "playwright", "metering", "web-scraping"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    # Only what the test suite has run on (pkg-1): macOS with Python 3.12. Linux and the other
+    # Python versions are added once the CI jobs in .github/workflows/ci.yml have passed there.
+    "Operating System :: MacOS",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Internet :: Proxy Servers",
+    "Topic :: Software Development :: Testing",
+]
+dependencies = [
+    "h11>=0.16",  # GHSA-vqfr-h8mv-ghfj / CVE-2025-43859: earlier h11 accepts malformed chunked bodies
+    "httpx[socks]>=0.27",
+]
+
+[project.optional-dependencies]
+browser = [
+    "playwright>=1.45",
+]
+dev = [
+    "pytest>=8",
+    "pytest-timeout>=2.3",
+    "trustme>=1.1",
+    "requests[socks]>=2.31",
+    "h2>=4.1",  # httpx http2=True for tests/test_helpers_hooks_h2.py (skipped without it)
+]
+
+[project.scripts]
+scrapescope = "scrapescope.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/ipvolt/scrapescope"
+Source = "https://github.com/ipvolt/scrapescope"
+Issues = "https://github.com/ipvolt/scrapescope/issues"
+
+[tool.hatch.version]
+path = "src/scrapescope/_version.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/scrapescope"]
+# Package data: hatchling ships every non-ignored file under the package
+# directory, which includes catalog/*.json and report/schema.json. The explicit
+# artifacts entry keeps that true even if a future .gitignore rule matches them.
+artifacts = [
+    "src/scrapescope/catalog/*.json",
+    "src/scrapescope/report/schema.json",
+]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/scrapescope",
+    "tests",
+    "docs",
+    "scripts",
+    "README.md",
+    "LICENSE",
+    "NOTICE",
+    "CONTRIBUTING.md",
+    "SECURITY.md",
+    "pyproject.toml",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-ra"
+markers = [
+    "browser: needs Playwright with Chromium installed; skipped cleanly when unavailable",
+]
+# pytest-timeout: every test gets a default per-test timeout; override with
+# @pytest.mark.timeout(N) where a test legitimately needs longer. The default
+# (signal) method fails only the test that hung instead of ending the session.
+timeout = 60

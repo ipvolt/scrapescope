@@ -1,0 +1,794 @@
+{
+  "version": "2026.09.23",
+  "attribution": "Some vendor signals are adapted from is-antibot (https://github.com/microlinkhq/is-antibot), MIT License, Copyright \u00a9 2025 Microlink <hello@microlink.io> (https://microlink.io). The full copyright and permission notice is in the NOTICE file shipped with scrapescope. Each signal lists its own sources: is-antibot's providers.json for the signals it has, vendor documentation pages for the rest.",
+  "notes": "Classification only: scrapescope uses these signals to say that a response is a challenge or block page, never to get past one. strength 'challenge' marks the response blocked; strength 'vendor' only names the vendor. Every signal cites sources that contain it (is-antibot or a vendor documentation page); a signal without one is not listed. Markers that also appear on ordinary pages (bot-management cookies, sensor scripts, CAPTCHA widgets, pages that mention a vendor) are vendor strength or restricted by statuses, and neither a 503 with a CAPTCHA widget nor a 503 with only a bot-management cookie or header is called a challenge (maintenance pages behind these vendors carry them too). The verify-page rules need a challenge status, because an ordinary 200 form can label its CAPTCHA widget 'Verify you are human'. Semantics: docs/dev/contracts.md section 8.",
+  "vendors": [
+    {
+      "id": "cloudflare",
+      "name": "Cloudflare",
+      "source": "Cloudflare documentation; _cf_chl_opt and cf_clearance also in is-antibot (MIT)",
+      "signals": [
+        {
+          "type": "header",
+          "name": "cf-mitigated",
+          "pattern": "^challenge$",
+          "statuses": [],
+          "strength": "challenge",
+          "sources": [
+            "https://developers.cloudflare.com/cloudflare-challenges/challenge-types/challenge-pages/detect-response/",
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ]
+        },
+        {
+          "type": "body",
+          "name": "challenge-options",
+          "pattern": "_cf_chl_opt",
+          "statuses": [
+            403,
+            429,
+            503
+          ],
+          "strength": "challenge",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ],
+          "note": "is-antibot matches this on any status; scrapescope adds the status restriction"
+        },
+        {
+          "type": "body",
+          "name": "error-1xxx",
+          "pattern": "^(?=[\\s\\S]*Access denied)(?=[\\s\\S]*\\bError\\s*(?:<[^>]{0,120}>\\s*){0,4}10[0-9]{2}\\b)",
+          "statuses": [
+            403
+          ],
+          "strength": "challenge",
+          "sources": [
+            "https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-1xxx-errors/error-1020/",
+            "https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-1xxx-errors/"
+          ],
+          "note": "Cloudflare's own 1xxx 'Access denied' block pages (for example Error 1020, a firewall rule) are 403 responses; the rule needs both the 'Access denied' text and an 'Error 10xx' code (markup between 'Error' and the code is allowed) and fires only on 403"
+        },
+        {
+          "type": "body",
+          "name": "challenge-platform",
+          "pattern": "/cdn-cgi/challenge-platform/",
+          "statuses": [],
+          "strength": "vendor",
+          "sources": [
+            "https://developers.cloudflare.com/cloudflare-challenges/challenge-types/javascript-detections/"
+          ]
+        },
+        {
+          "type": "header",
+          "name": "cf-ray",
+          "pattern": null,
+          "statuses": [],
+          "strength": "vendor",
+          "sources": [
+            "https://developers.cloudflare.com/fundamentals/reference/http-headers/"
+          ]
+        },
+        {
+          "type": "cookie",
+          "name": "__cf_bm",
+          "pattern": null,
+          "statuses": [],
+          "strength": "vendor",
+          "sources": [
+            "https://developers.cloudflare.com/fundamentals/reference/policies-compliances/cloudflare-cookies/"
+          ]
+        },
+        {
+          "type": "cookie",
+          "name": "cf_clearance",
+          "pattern": null,
+          "statuses": [],
+          "strength": "vendor",
+          "sources": [
+            "https://developers.cloudflare.com/fundamentals/reference/policies-compliances/cloudflare-cookies/",
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ]
+        }
+      ],
+      "docs": [
+        "https://developers.cloudflare.com/cloudflare-challenges/challenge-types/challenge-pages/detect-response/",
+        "https://developers.cloudflare.com/cloudflare-challenges/challenge-types/javascript-detections/",
+        "https://developers.cloudflare.com/fundamentals/reference/http-headers/",
+        "https://developers.cloudflare.com/fundamentals/reference/policies-compliances/cloudflare-cookies/",
+        "https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-1xxx-errors/error-1020/"
+      ]
+    },
+    {
+      "id": "aws-waf",
+      "name": "AWS WAF",
+      "source": "AWS WAF documentation; gokuProps and aws-waf-token from is-antibot (MIT)",
+      "signals": [
+        {
+          "type": "header",
+          "name": "x-amzn-waf-action",
+          "pattern": "^challenge$",
+          "statuses": [
+            202
+          ],
+          "strength": "challenge",
+          "sources": [
+            "https://docs.aws.amazon.com/waf/latest/developerguide/waf-captcha-and-challenge-actions.html"
+          ]
+        },
+        {
+          "type": "header",
+          "name": "x-amzn-waf-action",
+          "pattern": "^captcha$",
+          "statuses": [
+            405
+          ],
+          "strength": "challenge",
+          "sources": [
+            "https://docs.aws.amazon.com/waf/latest/developerguide/waf-captcha-and-challenge-actions.html"
+          ]
+        },
+        {
+          "type": "body",
+          "name": "challenge-script",
+          "pattern": "gokuProps",
+          "statuses": [
+            202,
+            405
+          ],
+          "strength": "challenge",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ],
+          "note": "is-antibot matches this on any status; scrapescope adds the status restriction"
+        },
+        {
+          "type": "header",
+          "name": "x-amzn-waf-action",
+          "pattern": null,
+          "statuses": [],
+          "strength": "vendor",
+          "sources": [
+            "https://docs.aws.amazon.com/waf/latest/developerguide/waf-captcha-and-challenge-actions.html",
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ]
+        },
+        {
+          "type": "cookie",
+          "name": "aws-waf-token",
+          "pattern": null,
+          "statuses": [],
+          "strength": "vendor",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ]
+        }
+      ],
+      "docs": [
+        "https://docs.aws.amazon.com/waf/latest/developerguide/waf-captcha-and-challenge-actions.html"
+      ]
+    },
+    {
+      "id": "vercel",
+      "name": "Vercel Firewall",
+      "source": "is-antibot (MIT)",
+      "signals": [
+        {
+          "type": "header",
+          "name": "x-vercel-mitigated",
+          "pattern": "^challenge$",
+          "statuses": [],
+          "strength": "challenge",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ]
+        },
+        {
+          "type": "header",
+          "name": "x-vercel-mitigated",
+          "pattern": null,
+          "statuses": [],
+          "strength": "vendor",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ]
+        }
+      ],
+      "docs": [
+        "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+      ]
+    },
+    {
+      "id": "datadome",
+      "name": "DataDome",
+      "source": "is-antibot (MIT)",
+      "signals": [
+        {
+          "type": "body",
+          "name": "captcha-delivery",
+          "pattern": "captcha-delivery\\.com",
+          "statuses": [
+            403,
+            405,
+            429
+          ],
+          "strength": "challenge",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ],
+          "note": "is-antibot matches this on any status; scrapescope adds the status restriction"
+        },
+        {
+          "type": "cookie",
+          "name": "datadome",
+          "pattern": null,
+          "statuses": [
+            403,
+            429
+          ],
+          "strength": "challenge",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ],
+          "note": "is-antibot uses statuses 403, 429 and 503; scrapescope leaves out 503, because DataDome sets this cookie on ordinary responses too, so a 503 maintenance page behind it would look like a challenge"
+        },
+        {
+          "type": "header",
+          "name": "x-datadome",
+          "pattern": null,
+          "statuses": [],
+          "strength": "vendor",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ]
+        },
+        {
+          "type": "header",
+          "name": "x-datadome-cid",
+          "pattern": null,
+          "statuses": [],
+          "strength": "vendor",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ]
+        },
+        {
+          "type": "header",
+          "name": "x-dd-b",
+          "pattern": "^[12]$",
+          "statuses": [],
+          "strength": "vendor",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ]
+        },
+        {
+          "type": "cookie",
+          "name": "datadome",
+          "pattern": null,
+          "statuses": [],
+          "strength": "vendor",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ]
+        }
+      ],
+      "docs": [
+        "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+      ]
+    },
+    {
+      "id": "human",
+      "name": "HUMAN (PerimeterX)",
+      "source": "is-antibot (MIT)",
+      "signals": [
+        {
+          "type": "body",
+          "name": "block-page",
+          "pattern": "^(?=[\\s\\S]*window\\._pxAppId)(?=[\\s\\S]*(?:px-captcha|/captcha/captcha\\.js|_pxAction|<title\\b[^>]*>\\s*Robot or human\\??\\s*</title>))",
+          "statuses": [
+            403,
+            429
+          ],
+          "strength": "challenge",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ],
+          "note": "is-antibot matches this on any status; scrapescope restricts it to 403 and 429 (HUMAN's block page is an error response), because a 200 article or tutorial can quote window._pxAppId and px-captcha"
+        },
+        {
+          "type": "body",
+          "name": "px-action",
+          "pattern": "_pxAction",
+          "statuses": [
+            403,
+            429
+          ],
+          "strength": "challenge",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ],
+          "note": "is-antibot matches this on any status; scrapescope adds the status restriction"
+        },
+        {
+          "type": "cookie",
+          "name": "_px3",
+          "pattern": null,
+          "statuses": [
+            403,
+            429
+          ],
+          "strength": "challenge",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ],
+          "note": "is-antibot uses statuses 403, 429 and 503; scrapescope leaves out 503, because HUMAN sets this cookie on ordinary responses too, so a 503 maintenance page behind it would look like a challenge"
+        },
+        {
+          "type": "cookie",
+          "name": "_pxhd",
+          "pattern": null,
+          "statuses": [
+            403,
+            429
+          ],
+          "strength": "challenge",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ],
+          "note": "is-antibot uses statuses 403, 429 and 503; scrapescope leaves out 503, because HUMAN sets this cookie on ordinary responses too, so a 503 maintenance page behind it would look like a challenge"
+        },
+        {
+          "type": "header",
+          "name": "x-px-authorization",
+          "pattern": null,
+          "statuses": [],
+          "strength": "vendor",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ]
+        },
+        {
+          "type": "body",
+          "name": "px-app-id",
+          "pattern": "window\\._pxAppId",
+          "statuses": [],
+          "strength": "vendor",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ]
+        }
+      ],
+      "docs": [
+        "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+      ]
+    },
+    {
+      "id": "akamai",
+      "name": "Akamai",
+      "source": "is-antibot (MIT); Akamai documentation for the error reference string",
+      "signals": [
+        {
+          "type": "cookie",
+          "name": "_abck",
+          "pattern": null,
+          "statuses": [
+            403,
+            429
+          ],
+          "strength": "challenge",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ],
+          "note": "is-antibot uses statuses 403, 429 and 503; scrapescope leaves out 503, because Akamai sets this cookie on ordinary responses too, so a 503 maintenance page behind it would look like a challenge"
+        },
+        {
+          "type": "body",
+          "name": "edge-reference",
+          "pattern": "Reference(?:\\s|&#32;)*(?:#|&#35;)[0-9]+(?:\\.|&#46;)[0-9a-f]{6,}(?:\\.|&#46;)[0-9]+(?:\\.|&#46;)[0-9a-f]{6,}",
+          "statuses": [
+            403
+          ],
+          "strength": "challenge",
+          "sources": [
+            "https://techdocs.akamai.com/edge-diagnostics/docs/translate-error-string"
+          ],
+          "note": "Akamai's edge error reference string ('Reference #9.6f64d440.1318965461.2f2b078' in Akamai's documentation), which its default 'Access Denied' page carries; HTML entities for the space, '#' and '.' are allowed. Fires only on 403"
+        },
+        {
+          "type": "header",
+          "name": "akamai-cache-status",
+          "pattern": "^Error",
+          "statuses": [],
+          "strength": "vendor",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ]
+        },
+        {
+          "type": "header",
+          "name": "x-akamai-session-info",
+          "pattern": null,
+          "statuses": [],
+          "strength": "vendor",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ]
+        },
+        {
+          "type": "body",
+          "name": "sensor-data",
+          "pattern": "bmak\\.sensor_data",
+          "statuses": [],
+          "strength": "vendor",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ]
+        },
+        {
+          "type": "cookie",
+          "name": "_abck",
+          "pattern": null,
+          "statuses": [],
+          "strength": "vendor",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ]
+        }
+      ],
+      "docs": [
+        "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json",
+        "https://techdocs.akamai.com/edge-diagnostics/docs/translate-error-string"
+      ]
+    },
+    {
+      "id": "imperva",
+      "name": "Imperva (Incapsula)",
+      "source": "is-antibot (MIT)",
+      "signals": [
+        {
+          "type": "header",
+          "name": "x-iinfo",
+          "pattern": null,
+          "statuses": [
+            403,
+            429
+          ],
+          "strength": "challenge",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ],
+          "note": "is-antibot uses statuses 403, 429 and 503; scrapescope leaves out 503, because Imperva sets this header on ordinary responses too, so a 503 maintenance page behind it would look like a challenge"
+        },
+        {
+          "type": "header",
+          "name": "x-cdn",
+          "pattern": "^Incapsula$",
+          "statuses": [
+            403,
+            429
+          ],
+          "strength": "challenge",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ],
+          "note": "is-antibot uses statuses 403, 429 and 503; scrapescope leaves out 503, because Imperva sets this header on ordinary responses too, so a 503 maintenance page behind it would look like a challenge"
+        },
+        {
+          "type": "cookie",
+          "name": "incap_ses_*",
+          "pattern": null,
+          "statuses": [
+            403,
+            429
+          ],
+          "strength": "challenge",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ],
+          "note": "is-antibot uses statuses 403, 429 and 503; scrapescope leaves out 503, because Imperva sets this cookie on ordinary responses too, so a 503 maintenance page behind it would look like a challenge"
+        },
+        {
+          "type": "cookie",
+          "name": "visid_incap_*",
+          "pattern": null,
+          "statuses": [
+            403,
+            429
+          ],
+          "strength": "challenge",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ],
+          "note": "is-antibot uses statuses 403, 429 and 503; scrapescope leaves out 503, because Imperva sets this cookie on ordinary responses too, so a 503 maintenance page behind it would look like a challenge"
+        },
+        {
+          "type": "cookie",
+          "name": "reese84",
+          "pattern": null,
+          "statuses": [
+            403,
+            429
+          ],
+          "strength": "challenge",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ],
+          "note": "is-antibot uses statuses 403, 429 and 503; scrapescope leaves out 503, because Imperva sets this cookie on ordinary responses too, so a 503 maintenance page behind it would look like a challenge"
+        },
+        {
+          "type": "body",
+          "name": "incapsula-resource",
+          "pattern": "_Incapsula_Resource\\?[A-Za-z0-9_]+=[0-9a-f]{8,},[0-9a-f]{8,}",
+          "statuses": [],
+          "strength": "vendor",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ],
+          "note": "is-antibot counts this script reference as a detection; it is on ordinary Imperva-protected pages, so it only names the vendor here"
+        },
+        {
+          "type": "body",
+          "name": "script-call",
+          "pattern": "(?:incapsula|imperva)\\.\\w+\\s*\\(",
+          "statuses": [],
+          "strength": "vendor",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ]
+        },
+        {
+          "type": "header",
+          "name": "x-iinfo",
+          "pattern": null,
+          "statuses": [],
+          "strength": "vendor",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ]
+        },
+        {
+          "type": "cookie",
+          "name": "incap_ses_*",
+          "pattern": null,
+          "statuses": [],
+          "strength": "vendor",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ]
+        },
+        {
+          "type": "cookie",
+          "name": "visid_incap_*",
+          "pattern": null,
+          "statuses": [],
+          "strength": "vendor",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ]
+        }
+      ],
+      "docs": [
+        "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+      ]
+    },
+    {
+      "id": "kasada",
+      "name": "Kasada",
+      "source": "is-antibot (MIT)",
+      "signals": [
+        {
+          "type": "header",
+          "name": "x-kasada-challenge",
+          "pattern": null,
+          "statuses": [],
+          "strength": "challenge",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ]
+        },
+        {
+          "type": "header",
+          "name": "x-kasada",
+          "pattern": null,
+          "statuses": [],
+          "strength": "vendor",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ]
+        },
+        {
+          "type": "body",
+          "name": "kasada-script",
+          "pattern": "__kasada|kasada\\.js",
+          "statuses": [],
+          "strength": "vendor",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ]
+        }
+      ],
+      "docs": [
+        "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+      ]
+    },
+    {
+      "id": "recaptcha",
+      "name": "Google reCAPTCHA",
+      "source": "reCAPTCHA documentation (markers); is-antibot (MIT) for the block-page rules",
+      "signals": [
+        {
+          "type": "body",
+          "name": "captcha-form",
+          "pattern": "^(?=[\\s\\S]*\\sid=[\"']captcha-form[\"'])(?=[\\s\\S]*g-recaptcha)",
+          "statuses": [
+            403,
+            429
+          ],
+          "strength": "challenge",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ],
+          "note": "is-antibot matches this on any status; scrapescope restricts it to 403 and 429 (Google's /sorry/ page is a 429), because an ordinary 200 contact or login form can carry id=\"captcha-form\" and a g-recaptcha widget"
+        },
+        {
+          "type": "body",
+          "name": "block-page",
+          "pattern": "g-recaptcha|\\b(?:window\\.)?grecaptcha\\s*\\.(?:execute|render|ready|getResponse|enterprise)\\b",
+          "statuses": [
+            403,
+            429
+          ],
+          "strength": "challenge",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json",
+            "https://developers.google.com/recaptcha/docs/display"
+          ],
+          "note": "is-antibot uses statuses 403, 429 and 503; scrapescope leaves out 503, because maintenance pages also load CAPTCHA widgets"
+        },
+        {
+          "type": "body",
+          "name": "api-js",
+          "pattern": "www\\.google\\.com/recaptcha/api\\.js",
+          "statuses": [],
+          "strength": "vendor",
+          "sources": [
+            "https://developers.google.com/recaptcha/docs/display"
+          ]
+        },
+        {
+          "type": "body",
+          "name": "widget",
+          "pattern": "class=[\"'][^\"']*\\bg-recaptcha\\b",
+          "statuses": [],
+          "strength": "vendor",
+          "sources": [
+            "https://developers.google.com/recaptcha/docs/display"
+          ]
+        }
+      ],
+      "docs": [
+        "https://developers.google.com/recaptcha/docs/display"
+      ]
+    },
+    {
+      "id": "hcaptcha",
+      "name": "hCaptcha",
+      "source": "hCaptcha documentation (markers); is-antibot (MIT) for the block-page rules",
+      "signals": [
+        {
+          "type": "body",
+          "name": "verify-page",
+          "pattern": "^(?=[\\s\\S]*\\bh-captcha(?!-response))(?=[\\s\\S]*(?:Verify you are (?:a )?human|Attention Required))",
+          "statuses": [
+            403,
+            429,
+            503
+          ],
+          "strength": "challenge",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ],
+          "note": "is-antibot matches this on any status; scrapescope restricts it to 403, 429 and 503, because a contact or signup form on an ordinary 200 page can label its widget 'Verify you are human'"
+        },
+        {
+          "type": "body",
+          "name": "block-page",
+          "pattern": "hcaptcha\\.com|\\bh-captcha(?!-response)",
+          "statuses": [
+            403,
+            429
+          ],
+          "strength": "challenge",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json",
+            "https://docs.hcaptcha.com/"
+          ],
+          "note": "is-antibot uses statuses 403, 429 and 503; scrapescope leaves out 503, because maintenance pages also load CAPTCHA widgets"
+        },
+        {
+          "type": "body",
+          "name": "api-js",
+          "pattern": "js\\.hcaptcha\\.com/1/api\\.js",
+          "statuses": [],
+          "strength": "vendor",
+          "sources": [
+            "https://docs.hcaptcha.com/"
+          ]
+        },
+        {
+          "type": "body",
+          "name": "widget",
+          "pattern": "class=[\"'][^\"']*\\bh-captcha\\b",
+          "statuses": [],
+          "strength": "vendor",
+          "sources": [
+            "https://docs.hcaptcha.com/"
+          ]
+        }
+      ],
+      "docs": [
+        "https://docs.hcaptcha.com/"
+      ]
+    },
+    {
+      "id": "turnstile",
+      "name": "Cloudflare Turnstile",
+      "source": "Cloudflare Turnstile documentation (markers); is-antibot (MIT) for the block-page rules",
+      "signals": [
+        {
+          "type": "body",
+          "name": "verify-page",
+          "pattern": "^(?=[\\s\\S]*cf-turnstile)(?=[\\s\\S]*(?:Just a moment|Attention Required|Verify you are (?:a )?human))",
+          "statuses": [
+            403,
+            429,
+            503
+          ],
+          "strength": "challenge",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json"
+          ],
+          "note": "is-antibot matches this on any status; scrapescope restricts it to 403, 429 and 503, because a contact or signup form on an ordinary 200 page can label its widget 'Verify you are human'"
+        },
+        {
+          "type": "body",
+          "name": "block-page",
+          "pattern": "cf-turnstile|challenges\\.cloudflare\\.com/turnstile",
+          "statuses": [
+            403,
+            429
+          ],
+          "strength": "challenge",
+          "sources": [
+            "https://github.com/microlinkhq/is-antibot/blob/HEAD/src/providers.json",
+            "https://developers.cloudflare.com/turnstile/get-started/client-side-rendering/"
+          ],
+          "note": "is-antibot uses statuses 403, 429 and 503; scrapescope leaves out 503, because maintenance pages also load CAPTCHA widgets"
+        },
+        {
+          "type": "body",
+          "name": "api-js",
+          "pattern": "challenges\\.cloudflare\\.com/turnstile/",
+          "statuses": [],
+          "strength": "vendor",
+          "sources": [
+            "https://developers.cloudflare.com/turnstile/get-started/client-side-rendering/"
+          ]
+        },
+        {
+          "type": "body",
+          "name": "widget",
+          "pattern": "class=[\"'][^\"']*\\bcf-turnstile\\b",
+          "statuses": [],
+          "strength": "vendor",
+          "sources": [
+            "https://developers.cloudflare.com/turnstile/get-started/client-side-rendering/"
+          ]
+        }
+      ],
+      "docs": [
+        "https://developers.cloudflare.com/turnstile/get-started/client-side-rendering/"
+      ]
+    }
+  ]
+}

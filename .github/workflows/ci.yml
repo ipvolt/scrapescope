@@ -1,0 +1,76 @@
+# CI for scrapescope (pkg-1). Every action is pinned to a full commit SHA (release checklist,
+# item 11); the comment after each SHA names the version tag it was resolved from on 2026-09-24.
+# The workflow needs no secrets: it builds, installs and tests from the checkout alone.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  install-and-test:
+    name: ${{ matrix.os }} / Python ${{ matrix.python }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, ubuntu-24.04, macos-14]
+        python: ["3.11", "3.12", "3.13", "3.14"]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Build the wheel and the sdist
+        run: uv build
+      - name: Install the wheel into a fresh environment and run the commands
+        run: |
+          uv venv --python "${{ matrix.python }}" "$RUNNER_TEMP/wheel"
+          uv pip install --python "$RUNNER_TEMP/wheel/bin/python" dist/*.whl
+          "$RUNNER_TEMP/wheel/bin/scrapescope" --version
+          "$RUNNER_TEMP/wheel/bin/scrapescope" --help > /dev/null
+          "$RUNNER_TEMP/wheel/bin/scrapescope" find --help > /dev/null
+          "$RUNNER_TEMP/wheel/bin/scrapescope" report docs/dev/example-report.json > /dev/null
+          "$RUNNER_TEMP/wheel/bin/scrapescope" report docs/dev/example-report-find.json --format html > /dev/null
+      - name: Install as a uv tool from the built wheel (the README installs the same package from GitHub)
+        # setup-uv leaves the tool bin dir at uv's default on Linux and macOS, so the check
+        # puts that directory on PATH itself instead of assuming the runner image does.
+        run: |
+          uv tool install dist/*.whl
+          PATH="$(uv tool dir --bin):$PATH" scrapescope --version
+      - name: Test suite without a browser (tests/test_packaging.py also scans the archives in dist/)
+        env:
+          SCRAPESCOPE_SKIP_BROWSER_TESTS: "1"
+        run: |
+          uv venv --python "${{ matrix.python }}" .venv
+          uv pip install --python .venv/bin/python -e '.[dev]'
+          .venv/bin/python -m pytest -m 'not browser'
+
+  browser:
+    name: ${{ matrix.os }} / Chromium
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-14]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22"
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
+        with:
+          python-version: "3.12"
+      - name: Install with the browser extra and Playwright's Chromium
+        run: |
+          uv venv --python 3.12 .venv
+          uv pip install --python .venv/bin/python -e '.[browser,dev]'
+          .venv/bin/python -m playwright install --with-deps chromium
+      - name: Full test suite (real Chromium, HTTP/2 origin through Node)
+        run: .venv/bin/python -m pytest

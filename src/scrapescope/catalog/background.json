@@ -1,0 +1,106 @@
+{
+  "version": "2026.09.23",
+  "notes": "Chromium background hosts: traffic the browser sends for itself, not for the page. scrapescope calls tunnel bytes 'background' ONLY when the host matches an entry here; an uncatalogued host is never called background. Every host has its own evidence in host_evidence (a source that names that host); evidence lists every source an entry uses, and credits name people or reports whose URL is in evidence. Hosts too broad to catalogue (www.google.com, which also serves /dl/ downloads per Google's documentation) are left out. Evidence URLs were last reviewed on the entry's last_verified date; re-check them before each release.",
+  "entries": [
+    {
+      "id": "optimization-guide",
+      "hosts": [
+        "optimizationguide-pa.googleapis.com"
+      ],
+      "component": "Chromium optimization guide: hint fetches and on-device model downloads (tens of MB for a fresh profile)",
+      "evidence": [
+        "https://github.com/nodemaven/proxy-benchmark/blob/main/NOTEBOOK.md#chrome-pays-its-vendor-43-mb-per-profile-and-the-pool-was-billed-for-it",
+        "https://www.skyvern.com/blog/how-we-accidentally-burned-through-200gb-of-proxy-bandwidth-in-6-hours",
+        "https://news.ycombinator.com/item?id=41593410",
+        "https://chromium.googlesource.com/chromium/src/+/main/components/optimization_guide/core/optimization_guide_features.cc"
+      ],
+      "host_evidence": {
+        "optimizationguide-pa.googleapis.com": [
+          "https://github.com/nodemaven/proxy-benchmark/blob/main/NOTEBOOK.md#chrome-pays-its-vendor-43-mb-per-profile-and-the-pool-was-billed-for-it",
+          "https://www.skyvern.com/blog/how-we-accidentally-burned-through-200gb-of-proxy-bandwidth-in-6-hours",
+          "https://chromium.googlesource.com/chromium/src/+/main/components/optimization_guide/core/optimization_guide_features.cc"
+        ]
+      },
+      "credits": [
+        "NodeMaven, measured 2026-08-19 (published by 2026-08-25): about 43 MB of optimization-guide downloads in a fresh browser profile through a proxy (intermittent: NodeMaven saw it in some idle windows, not all), not stopped by --disable-background-networking or --disable-component-update, removed by refusing the host at their relay",
+        "Skyvern postmortem (discussed on Hacker News, item 41593410): about 200 GB of proxy traffic in six hours; fixed with a persistent user_data_dir and a proxy rule rejecting this host"
+      ],
+      "security_tradeoff": "Blocking it stops optimization-guide hint fetches and model downloads; browser features that rely on those hints and models may stop working or degrade, and which features use them varies by Chrome version. Certificate-revocation and Safe Browsing data arrive through other catalogued hosts.",
+      "last_verified": "2026-09-23"
+    },
+    {
+      "id": "component-updater",
+      "hosts": [
+        "update.googleapis.com",
+        "*.gvt1.com",
+        "dl.google.com"
+      ],
+      "component": "Chromium component updater and Chrome update downloads: update checks (update.googleapis.com) and component, CRX and update downloads (*.gvt1.com, dl.google.com)",
+      "evidence": [
+        "https://chromium.googlesource.com/chromium/src/+/main/components/component_updater/component_updater_url_constants.cc",
+        "https://support.google.com/chrome/a/answer/6350036",
+        "https://github.com/puppeteer/puppeteer/issues/7042",
+        "https://github.com/nodemaven/proxy-benchmark/blob/main/NOTEBOOK.md#chrome-pays-its-vendor-43-mb-per-profile-and-the-pool-was-billed-for-it"
+      ],
+      "host_evidence": {
+        "update.googleapis.com": [
+          "https://chromium.googlesource.com/chromium/src/+/main/components/component_updater/component_updater_url_constants.cc",
+          "https://support.google.com/chrome/a/answer/6350036"
+        ],
+        "*.gvt1.com": [
+          "https://support.google.com/chrome/a/answer/6350036",
+          "https://github.com/puppeteer/puppeteer/issues/7042",
+          "https://github.com/nodemaven/proxy-benchmark/blob/main/NOTEBOOK.md#chrome-pays-its-vendor-43-mb-per-profile-and-the-pool-was-billed-for-it"
+        ],
+        "dl.google.com": [
+          "https://support.google.com/chrome/a/answer/6350036",
+          "https://github.com/puppeteer/puppeteer/issues/7042"
+        ]
+      },
+      "security_tradeoff": "Component updates also deliver certificate-revocation data (CRLSet), Safe Browsing and other security components; blocking them leaves a long-lived profile with stale security data.",
+      "last_verified": "2026-09-23"
+    },
+    {
+      "id": "extension-updater",
+      "hosts": [
+        "clients2.google.com",
+        "clients2.googleusercontent.com"
+      ],
+      "component": "Chrome extension update checks and .crx downloads (clients2.google.com/service/update2/crx, clients2.googleusercontent.com/crx/blobs), plus network-time queries on clients2.google.com",
+      "evidence": [
+        "https://chromium.googlesource.com/chromium/src/+/main/extensions/common/extension_urls.cc",
+        "https://chromium.googlesource.com/chromium/src/+/main/components/network_time/network_time_tracker.cc",
+        "https://support.google.com/chrome/a/answer/6350036"
+      ],
+      "host_evidence": {
+        "clients2.google.com": [
+          "https://chromium.googlesource.com/chromium/src/+/main/extensions/common/extension_urls.cc",
+          "https://chromium.googlesource.com/chromium/src/+/main/components/network_time/network_time_tracker.cc",
+          "https://support.google.com/chrome/a/answer/6350036"
+        ],
+        "clients2.googleusercontent.com": [
+          "https://support.google.com/chrome/a/answer/6350036"
+        ]
+      },
+      "security_tradeoff": "Blocking it stops extension and component updates delivered through these hosts, including security fixes, and the network-time check Chrome uses to explain certificate date errors.",
+      "last_verified": "2026-09-23"
+    },
+    {
+      "id": "safe-browsing",
+      "hosts": [
+        "safebrowsing.googleapis.com"
+      ],
+      "component": "Safe Browsing list updates and hash-prefix lookups",
+      "evidence": [
+        "https://chromium.googlesource.com/chromium/src/+/main/extensions/common/extension_urls.cc"
+      ],
+      "host_evidence": {
+        "safebrowsing.googleapis.com": [
+          "https://chromium.googlesource.com/chromium/src/+/main/extensions/common/extension_urls.cc"
+        ]
+      },
+      "security_tradeoff": "Blocking it removes malware and phishing warnings from the profile; keep it for any browser that visits untrusted pages while signed in to real accounts.",
+      "last_verified": "2026-09-23"
+    }
+  ]
+}

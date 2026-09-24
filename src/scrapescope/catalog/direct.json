@@ -1,0 +1,14 @@
+{
+  "version": "2026.09.23",
+  "notes": "Hosts that scrapescope run --env-all carries DIRECT (never to the upstream proxy) and reports as non-target: LLM APIs a job calls on its own behalf, which the job never sent through its proxy before --env-all set proxy variables for the whole child. The meter connects to them from this machine's own IP address, for every client of the meter. Cloud-storage hosts (S3, GCS, Azure Blob, R2) are deliberately not listed: buckets are often scrape targets, and carrying them direct would expose the user's IP to the bucket owner. Only exact API hostnames and provider-owned wildcards belong here. One known trade-off: OpenRouter serves its API (openrouter.ai/api/v1) on the same host as its website, and host rules cannot tell paths apart, so under --env-all a job's requests to openrouter.ai web pages also leave direct from this machine's IP and are not metered. Without --env-all this catalog is only used to label hosts in --redact-hosts reports.",
+  "entries": [
+    {"id": "openai", "hosts": ["api.openai.com"], "reason": "LLM API (OpenAI)", "docs": ["https://platform.openai.com/docs/api-reference"]},
+    {"id": "azure-openai", "hosts": ["*.openai.azure.com"], "reason": "LLM API (Azure OpenAI)", "docs": ["https://learn.microsoft.com/en-us/azure/ai-services/openai/reference"]},
+    {"id": "anthropic", "hosts": ["api.anthropic.com"], "reason": "LLM API (Anthropic)", "docs": ["https://docs.anthropic.com/en/api/overview"]},
+    {"id": "google-gemini", "hosts": ["generativelanguage.googleapis.com"], "reason": "LLM API (Google Gemini API)", "docs": ["https://ai.google.dev/api"]},
+    {"id": "mistral", "hosts": ["api.mistral.ai"], "reason": "LLM API (Mistral AI)", "docs": ["https://docs.mistral.ai/api/"]},
+    {"id": "groq", "hosts": ["api.groq.com"], "reason": "LLM API (Groq)", "docs": ["https://console.groq.com/docs/api-reference"]},
+    {"id": "together", "hosts": ["api.together.ai", "api.together.xyz"], "reason": "LLM API (Together AI; api.together.xyz is the host of the deprecated v1 Python SDK)", "docs": ["https://docs.together.ai/docs/inference/openai-compatibility", "https://github.com/togethercomputer/together-python"]},
+    {"id": "openrouter", "hosts": ["openrouter.ai"], "reason": "LLM API (OpenRouter; its API shares the openrouter.ai host with its website, see notes)", "docs": ["https://openrouter.ai/docs/api_reference/overview"]}
+  ]
+}

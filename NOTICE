@@ -1,0 +1,68 @@
+scrapescope
+Copyright (c) 2026 ipvolt
+
+scrapescope is released under the MIT License (see LICENSE).
+
+ipvolt's commitment
+-------------------
+ipvolt, a proxy provider, started and maintains scrapescope. We commit that:
+
+1. scrapescope stays free and MIT-licensed. There is no paid tier, licence key,
+   usage limit or feature held back for ipvolt customers, and we will not
+   relicense existing or future releases under more restrictive terms.
+2. scrapescope works with any proxy provider, or with no provider at all
+   (direct "sizing" mode). It has no ipvolt default upstream, rate or account,
+   and it never favours ipvolt in what it measures or recommends.
+3. scrapescope never contacts ipvolt. It has no telemetry, analytics, crash
+   reporting or update checks. It makes network connections only on behalf of
+   the job you run through it, the page you ask `scrapescope find` to load, and
+   the single replay request you ask for with `--verify`.
+
+If a release ever breaks one of these commitments, treat it as a bug and report
+it as described in SECURITY.md.
+
+Third-party material
+--------------------
+Some challenge-page detection signals in src/scrapescope/catalog/challenges.json
+are adapted from is-antibot (https://github.com/microlinkhq/is-antibot), used
+under the MIT License. They are used only to classify a response as a
+challenge or block page, never to get past one. Each signal in
+challenges.json lists its own sources.
+
+Adapted from is-antibot: the body marker _cf_chl_opt and the cf_clearance
+cookie (Cloudflare); gokuProps and the aws-waf-token cookie (AWS WAF);
+x-vercel-mitigated (Vercel); captcha-delivery.com, the datadome cookie,
+x-datadome, x-datadome-cid and x-dd-b (DataDome); the block-page pattern,
+_pxAction, _px3, _pxhd, x-px-authorization and _pxAppId (HUMAN/PerimeterX);
+_abck, akamai-cache-status, x-akamai-session-info and bmak.sensor_data
+(Akamai); x-iinfo, x-cdn: Incapsula, incap_ses_*, visid_incap_*, reese84, the
+_Incapsula_Resource pattern and the incapsula/imperva call pattern (Imperva);
+x-kasada, x-kasada-challenge, __kasada and kasada.js (Kasada); and the
+block-page and verify-page rules for reCAPTCHA, hCaptcha and Turnstile. The
+cf-mitigated and x-amzn-waf-action signals come from the vendors'
+documentation and also appear in is-antibot.
+
+is-antibot's copyright and permission notice, reproduced as its licence
+requires:
+
+    The MIT License (MIT)
+
+    Copyright © 2025 Microlink <hello@microlink.io> (https://microlink.io)
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in
+    all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+    THE SOFTWARE.

@@ -1,0 +1,21 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Test and tool caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# scrapescope outputs (may name the hosts your job talked to)
+scrapescope-report.json
+scrapescope-report.html
+reports/
+*.scrapescope-events.jsonl
