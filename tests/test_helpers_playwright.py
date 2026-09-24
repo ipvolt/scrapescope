@@ -1610,7 +1610,11 @@ def test_fulfilled_aborted_and_blocked_requests_are_not_network_requests_in_chro
     assert "stub.invalid" not in {t.host for t in tunnels}
     result = attribute(_snapshot(tunnels, started), events, _fixture_catalogs())
     assert result.bypass.incomplete is False, result.warnings
-    assert "failed" not in result.status_histogram
+    failed_events = [
+        {k: v for k, v in e.to_dict().items() if k in ("host", "path", "resource_type", "status", "failed", "failure", "frame", "from_service_worker", "no_network")}
+        for e in events if isinstance(e, RequestEvent) and e.failed
+    ]
+    assert "failed" not in result.status_histogram, failed_events
     types = {t.type: t for t in result.types}
     assert "font" not in types  # the fulfilled font takes no share of origin-a.test's tunnel bytes
     network_images = [e for e in events if isinstance(e, RequestEvent) and e.resource_type == "image" and e.hit_network]
