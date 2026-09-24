@@ -1803,8 +1803,11 @@ def test_a_persistent_profile_run_twice_writes_its_warm_cache_hits_as_cache_hits
     try:
         first = run()
         assert origin.served == ["www.test/", "cdn.test/i.png"]
-        assert [(e.host, e.from_cache) for e in first] == [("www.test", False), ("cdn.test", False)]
-        assert first[1].encoded_body_bytes == len(site.image(site.EMBED_IMAGE))
+        # Events are written in completion order, and the image can finish before the document
+        # on a slow machine, so compare per host rather than by position.
+        assert {(e.host, e.from_cache) for e in first} == {("www.test", False), ("cdn.test", False)}
+        assert len(first) == 2
+        assert next(e for e in first if e.host == "cdn.test").encoded_body_bytes == len(site.image(site.EMBED_IMAGE))
         second = run()
     finally:
         origin.close()

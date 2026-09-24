@@ -169,12 +169,14 @@ def test_find_through_upstream_finds_verifies_and_keeps_the_value_private(fresh_
     # machine (probed with the same sandboxed launch find makes first); the output above is complete either
     # way. Where the sandbox works (macOS, most Linux hosts) this is the strict form: no note at all.
     sandbox_blocked = chromium_sandbox_unavailable_reason()
+    entry = report["find"][0]
+    # A find result's own warnings are serialised under find[0].warnings, not the report's top level.
     if sandbox_blocked is None:
-        assert "OS sandbox" not in proc.stdout and SANDBOX_WARNING not in report["warnings"]
+        assert "OS sandbox" not in proc.stdout and SANDBOX_WARNING not in entry["warnings"]
+        assert SANDBOX_WARNING not in report["warnings"]
     else:
         assert f"  - {SANDBOX_WARNING}" in proc.stdout, sandbox_blocked
-        assert SANDBOX_WARNING in report["warnings"]
-    entry = report["find"][0]
+        assert SANDBOX_WARNING in entry["warnings"], entry["warnings"]
     assert entry["status"] == "found" and entry["verify"]["replays"] == "yes"
     matches = entry["matches"]
     assert all(m["path"] is None for m in matches)  # paths only with --keep-urls
