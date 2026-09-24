@@ -1,0 +1,351 @@
+{
+  "schema_version": 1,
+  "tool_version": "0.1.0",
+  "command": "run",
+  "catalog_versions": {
+    "background": "2026.09.23",
+    "challenges": "2026.09.23",
+    "direct": "2026.09.23"
+  },
+  "started_at": "2026-09-23T10:00:00.000Z",
+  "ended_at": "2026-09-23T10:02:33.250Z",
+  "mode": "http-connect",
+  "gb_unit": "GB",
+  "labels": {
+    "totals": "tunnel-measured",
+    "allocated": "allocated",
+    "hook": "hook-reported",
+    "cost": "estimated billable transfer"
+  },
+  "totals": {
+    "with_connect": 9114510,
+    "without_connect": 9113400,
+    "bytes_sent": 149776,
+    "bytes_received": 8964734,
+    "tunnels": 6,
+    "failed_tunnels": 0,
+    "denied_tunnels": 0,
+    "with_connect_estimated": false,
+    "connections": 6
+  },
+  "budget": {
+    "limit_bytes": 2000000000,
+    "max_tunnel_bytes": null,
+    "counted_bytes": 9114510,
+    "tripped": false
+  },
+  "units": {
+    "count": 25,
+    "source": "navigations",
+    "low_sample_warning": false
+  },
+  "browser_launches": 1,
+  "bytes_before_first_navigation": 1500185,
+  "per_unit": {
+    "first_unit_bytes": 2300000,
+    "rest_units": 24,
+    "rest_bytes": 5314325,
+    "rest_mean_bytes": 221430,
+    "resolution_s": 0.25
+  },
+  "hosts": [
+    {
+      "host": "origin-c.test",
+      "ports": [
+        443
+      ],
+      "tunnels": 1,
+      "failed_tunnels": 0,
+      "denied_tunnels": 0,
+      "bytes_sent": 40146,
+      "bytes_received": 3960039,
+      "bytes_with_connect": 4000185,
+      "bytes_without_connect": 4000000,
+      "requests": 77,
+      "buckets": {
+        "attributed": {
+          "tunnels": 1,
+          "bytes": 4000185
+        }
+      },
+      "allocated_by_type": {
+        "font": 789342,
+        "image": 3210843
+      },
+      "background_id": null,
+      "paths": []
+    },
+    {
+      "host": "origin-a.test",
+      "ports": [
+        443
+      ],
+      "tunnels": 2,
+      "failed_tunnels": 0,
+      "denied_tunnels": 0,
+      "bytes_sent": 90292,
+      "bytes_received": 3450078,
+      "bytes_with_connect": 3540370,
+      "bytes_without_connect": 3540000,
+      "requests": 52,
+      "buckets": {
+        "attributed": {
+          "tunnels": 2,
+          "bytes": 3540370
+        }
+      },
+      "allocated_by_type": {
+        "document": 1180875,
+        "script": 947062,
+        "stylesheet": 292201,
+        "xhr": 1120232
+      },
+      "background_id": null,
+      "paths": []
+    },
+    {
+      "host": "optimizationguide-pa.googleapis.com",
+      "ports": [
+        443
+      ],
+      "tunnels": 1,
+      "failed_tunnels": 0,
+      "denied_tunnels": 0,
+      "bytes_sent": 3146,
+      "bytes_received": 1497039,
+      "bytes_with_connect": 1500185,
+      "bytes_without_connect": 1500000,
+      "requests": 0,
+      "buckets": {
+        "background:optimization-guide": {
+          "tunnels": 1,
+          "bytes": 1500185
+        }
+      },
+      "allocated_by_type": {},
+      "background_id": "optimization-guide",
+      "paths": []
+    },
+    {
+      "host": "origin-d.test",
+      "ports": [
+        443
+      ],
+      "tunnels": 1,
+      "failed_tunnels": 0,
+      "denied_tunnels": 0,
+      "bytes_sent": 14146,
+      "bytes_received": 52039,
+      "bytes_with_connect": 66185,
+      "bytes_without_connect": 66000,
+      "requests": 0,
+      "buckets": {
+        "unattributed": {
+          "tunnels": 1,
+          "bytes": 66185
+        }
+      },
+      "allocated_by_type": {},
+      "background_id": null,
+      "paths": []
+    },
+    {
+      "host": "origin-b.test",
+      "ports": [
+        443
+      ],
+      "tunnels": 1,
+      "failed_tunnels": 0,
+      "denied_tunnels": 0,
+      "bytes_sent": 2046,
+      "bytes_received": 5539,
+      "bytes_with_connect": 7585,
+      "bytes_without_connect": 7400,
+      "requests": 0,
+      "buckets": {
+        "preconnect_idle": {
+          "tunnels": 1,
+          "bytes": 7585
+        }
+      },
+      "allocated_by_type": {},
+      "background_id": null,
+      "paths": []
+    }
+  ],
+  "types": [
+    {
+      "type": "image",
+      "requests": 75,
+      "reported_bytes": 3221250,
+      "allocated_bytes": 3210843
+    },
+    {
+      "type": "document",
+      "requests": 25,
+      "reported_bytes": 973750,
+      "allocated_bytes": 1180875
+    },
+    {
+      "type": "xhr",
+      "requests": 25,
+      "reported_bytes": 923750,
+      "allocated_bytes": 1120232
+    },
+    {
+      "type": "script",
+      "requests": 1,
+      "reported_bytes": 780950,
+      "allocated_bytes": 947062
+    },
+    {
+      "type": "font",
+      "requests": 2,
+      "reported_bytes": 791900,
+      "allocated_bytes": 789342
+    },
+    {
+      "type": "stylesheet",
+      "requests": 1,
+      "reported_bytes": 240950,
+      "allocated_bytes": 292201
+    }
+  ],
+  "buckets": {
+    "attributed": 7540555,
+    "preconnect_idle": 7585,
+    "before_attach": 0,
+    "unattributed": 66185,
+    "background": {
+      "optimization-guide": 1500185
+    }
+  },
+  "non_target": [
+    {
+      "host": "api.openai.com",
+      "catalog_id": "openai",
+      "tunnels": 1,
+      "bytes_sent": 900,
+      "bytes_received": 4000
+    }
+  ],
+  "status_histogram": {
+    "200": 128,
+    "404": 1
+  },
+  "success": {
+    "count": 24,
+    "basis": "navigations",
+    "rate": 0.96
+  },
+  "find": [],
+  "budget_events": [],
+  "warnings": [
+    "1 tunnel matched the background catalog (optimization-guide): Chromium traffic the job did not request",
+    "--env-all: 1 non-target tunnel(s) to direct.json hosts bypassed the upstream proxy; the meter looked those names up and connected from this machine's own IP address"
+  ],
+  "incomplete": false,
+  "bypass": {
+    "hosts": [],
+    "requests": 0
+  },
+  "what_if": [
+    {
+      "id": "block-images-media-fonts",
+      "title": "Block images, media and fonts",
+      "bytes_saved": 4000185,
+      "share": 0.438881,
+      "basis": "allocated",
+      "caveats": [
+        "blocking can break extraction or attract anti-bot scrutiny; compare a second run",
+        "cache loss not modelled"
+      ]
+    },
+    {
+      "id": "deny-background-catalog",
+      "title": "Deny catalogued Chromium background hosts",
+      "bytes_saved": 1500185,
+      "share": 0.164593,
+      "basis": "allocated",
+      "caveats": [
+        "optimization-guide: Blocking it stops optimization-guide hint fetches and model downloads; browser features that rely on those hints and models may stop working or degrade, and which features use them varies by Chrome version. Certificate-revocation and Safe Browsing data arrive through other catalogued hosts.",
+        "compare a second run"
+      ]
+    }
+  ],
+  "fixes": [
+    {
+      "id": "playwright-cdp-block",
+      "title": "Block fonts and media per page with CDP; disable images at launch (keeps the HTTP cache)",
+      "detection": "images, media and fonts were 44% of the run's bytes (4.00 MB allocated of 9.11 MB)",
+      "language": "python",
+      "code": "# Cache-preserving blocking for Playwright (Python, Chromium).\n# Images: a Blink setting at launch. Fonts and media: CDP Network.setBlockedURLs\n# on every page before it navigates. Neither disables the HTTP cache (route() does).\n# CDP reference: https://chromedevtools.github.io/devtools-protocol/tot/Network/#method-setBlockedURLs\n# Limits: URL patterns miss fonts and media served without a file extension, and\n# the CDP block applies to that page only (not to out-of-process iframes or workers).\nfrom playwright.sync_api import sync_playwright\n\nLAUNCH_ARGS = [\"--blink-settings=imagesEnabled=false\"]\nBLOCKED_URL_PATTERNS = [\n    \"*.woff2\", \"*.woff\", \"*.ttf\", \"*.otf\", \"*.eot\",\n    \"*.mp4\", \"*.webm\", \"*.m4s\", \"*.m3u8\", \"*.mp3\", \"*.m4a\", \"*.ogg\", \"*.wav\",\n]\n\n\ndef block_fonts_and_media(page):\n    \"\"\"Block font and media URLs for this page. Call it before page.goto().\"\"\"\n    cdp = page.context.new_cdp_session(page)\n    cdp.send(\"Network.enable\")\n    cdp.send(\"Network.setBlockedURLs\", {\"urls\": BLOCKED_URL_PATTERNS})\n    return cdp\n\n\nif __name__ == \"__main__\":\n    with sync_playwright() as p:\n        # Keep your own launch options (proxy=..., headless=...) and add LAUNCH_ARGS.\n        browser = p.chromium.launch(args=LAUNCH_ARGS)\n        context = browser.new_context()\n        page = context.new_page()\n        block_fonts_and_media(page)  # repeat for every page you open, before goto()\n        page.goto(\"https://example.com/\")\n        browser.close()\n",
+      "caveats": [
+        "blocking can break extraction or attract anti-bot scrutiny; compare a second run",
+        "URL patterns miss fonts and media served without a file extension; the CDP block covers the page it is attached to, not out-of-process iframes or workers",
+        "verify with a compared second run"
+      ]
+    },
+    {
+      "id": "playwright-route-block",
+      "title": "Alternative: block with route() (disables the HTTP cache)",
+      "detection": "images, media and fonts were 44% of the run's bytes (4.00 MB allocated of 9.11 MB)",
+      "language": "python",
+      "code": "# Alternative: block images, media and fonts with route().\n# Playwright documents: \"Enabling routing disables http cache.\" Stylesheets,\n# scripts and fonts are then downloaded again for every page, which can cost more\n# than blocking saves on multi-page runs. Routes also miss requests that a\n# service worker makes, so service workers are blocked here.\nfrom playwright.sync_api import sync_playwright\n\nBLOCKED_RESOURCE_TYPES = {\"image\", \"media\", \"font\"}\nCONTEXT_OPTIONS = {\"service_workers\": \"block\"}\n\n\ndef block_heavy_resources(route):\n    \"\"\"Abort image, media and font requests; let everything else through.\"\"\"\n    if route.request.resource_type in BLOCKED_RESOURCE_TYPES:\n        route.abort()\n    else:\n        route.continue_()\n\n\nif __name__ == \"__main__\":\n    with sync_playwright() as p:\n        browser = p.chromium.launch()  # keep your own launch options (proxy=..., ...)\n        context = browser.new_context(**CONTEXT_OPTIONS)\n        context.route(\"**/*\", block_heavy_resources)\n        page = context.new_page()\n        page.goto(\"https://example.com/\")\n        browser.close()\n",
+      "caveats": [
+        "blocking can break extraction or attract anti-bot scrutiny; compare a second run",
+        "routing disables the HTTP cache and misses service-worker requests",
+        "this run loaded several pages per context; without the HTTP cache, repeated stylesheets, scripts and fonts are downloaded again, which can cost more than blocking saves",
+        "verify with a compared second run"
+      ]
+    },
+    {
+      "id": "chromium-background-flags",
+      "title": "Refuse catalogued background hosts at the meter and keep one browser profile",
+      "detection": "1.50 MB went to catalogued background hosts (optimization-guide)",
+      "language": "python",
+      "code": "# Stop paying proxy bytes for Chromium's own background downloads.\n# Catalogued background hosts seen in this run: optimizationguide-pa.googleapis.com\n#\n# 1. Refuse them at the meter. This works whatever launches the browser:\n#      scrapescope run --deny-catalog background -- <your command>\n#    or one host at a time:\n#      scrapescope run --deny-host optimizationguide-pa.googleapis.com -- <your command>\n#    NodeMaven measured about 43 MB of optimization-guide downloads in a fresh\n#    profile (intermittent: they saw it in some idle windows, not all) and\n#    removed them by refusing that host at their proxy relay; the Skyvern\n#    postmortem added a proxy rule rejecting the same host.\n# 2. Keep one browser profile between launches (below), so a component or model\n#    downloaded once is not fetched again for every fresh profile (Skyvern's\n#    other change).\n#\n# Launch switches are not the fix: Playwright already passes\n# --disable-background-networking and --disable-component-update, and NodeMaven\n# saw the optimization-guide fetch with both switches in force. Only launchers\n# that do not set them (raw CDP, Selenium) gain anything from adding them.\n#\n# Security trade-off: refusing component-update and Safe Browsing hosts also\n# stops certificate-revocation (CRLSet) and Safe Browsing data for the profile.\n# Use it for short-lived automation profiles, not for a browser that signs in to\n# real accounts. A persistent profile keeps cookies and site data between runs;\n# clear it when runs must not share state.\nfrom playwright.sync_api import sync_playwright\n\nfrom scrapescope.helpers.playwright import instrument, proxy_settings, record_launch\n\nUSER_DATA_DIR = \"./chromium-profile\"\n\n\ndef launch_context(playwright, **options):\n    \"\"\"A persistent context that stays metered and attributed under scrapescope run.\"\"\"\n    options.setdefault(\"proxy\", proxy_settings())\n    context = playwright.chromium.launch_persistent_context(USER_DATA_DIR, **options)\n    record_launch(context)  # counts this browser once, also where Playwright gives the context no Browser\n    return instrument(context)\n\n\nif __name__ == \"__main__\":\n    with sync_playwright() as p:\n        context = launch_context(p)\n        page = context.pages[0] if context.pages else context.new_page()\n        page.goto(\"https://example.com/\")\n        context.close()\n",
+      "caveats": [
+        "security trade-off: component updates also deliver certificate-revocation and Safe Browsing data",
+        "launch switches are not the fix: Playwright already passes --disable-background-networking and --disable-component-update, and the optimization-guide download was observed with both in force",
+        "a persistent profile keeps cookies and site data between runs",
+        "verify with a compared second run"
+      ]
+    },
+    {
+      "id": "playwright-mcp-flags",
+      "title": "If you use Playwright MCP: run it under a budgeted meter that refuses background hosts, and keep a profile",
+      "detection": "1.50 MB went to catalogued background hosts (optimization-guide)",
+      "language": "shell",
+      "code": "# If you use Playwright MCP: start its server under scrapescope run. Its browser\n# then goes through a meter that refuses the catalogued background hosts and\n# stops at a budget (2GB here: choose your own). Keep one profile between\n# sessions so fresh-profile downloads are not repeated.\n# Catalogued background hosts seen in this run: optimizationguide-pa.googleapis.com\n# Use this as the server command in your MCP client's configuration. run keeps\n# the MCP protocol on stdin/stdout untouched (--quiet: no summary on stderr) and\n# writes its report when the server exits.\n# While the server runs, the meter's local listener (a random port, given to the\n# server as $SCRAPESCOPE_PROXY_URL) accepts connections without a token from any\n# local process, like every scrapescope run; --budget bounds what they can spend.\n# Give run the same --upstream-from-env VAR or --direct as your other runs.\n# Pin the Playwright MCP release you reviewed: replace X.Y.Z (npm view @playwright/mcp version).\n# Refusing at the meter covers browser-process downloads such as the\n# optimization guide. Playwright MCP's --blocked-origins does not replace it: it\n# is implemented with Playwright routing, which intercepts page and worker\n# requests only, and routing disables the HTTP cache.\n# Security trade-off: refusing component-update and Safe Browsing hosts also\n# stops certificate-revocation and Safe Browsing data for that profile.\nscrapescope run --budget 2GB --deny-catalog background --quiet -- \\\n  sh -c 'exec npx -y @playwright/mcp@X.Y.Z --proxy-server \"$SCRAPESCOPE_PROXY_URL\" --user-data-dir ./mcp-profile'\n",
+      "caveats": [
+        "while the MCP server runs, any local process can use the meter's listener without a token and spend your provider balance; keep --budget set",
+        "pin the Playwright MCP release you reviewed instead of @latest",
+        "security trade-off: component updates also deliver certificate-revocation and Safe Browsing data",
+        "a persistent profile keeps cookies and site data between runs",
+        "verify with a compared second run"
+      ]
+    }
+  ],
+  "cost": {
+    "rate": 3.0,
+    "rate_unit": "USD per GB",
+    "with_connect": 0.027344,
+    "without_connect": 0.02734,
+    "per_1000_units": 1.093741,
+    "per_1000_successes": 1.139314,
+    "label": "estimated billable transfer",
+    "currency": "USD"
+  },
+  "refused": {
+    "auth_challenge": 2
+  },
+  "tunnel_failures": {},
+  "accept_limit_errors": 0,
+  "helper_events": {
+    "attach": 1,
+    "launch": 1,
+    "request": 129,
+    "dropped": 0
+  }
+}

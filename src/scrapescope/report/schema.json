@@ -1,0 +1,1301 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:scrapescope:report:v1",
+  "title": "scrapescope report.json v1",
+  "description": "Metering report written by scrapescope run/serve/find. Totals are tunnel-measured, per-request and per-type figures are allocated, costs are estimated billable transfer. Never contains bodies, query strings, cookies, header values, credentials, the upstream host or find values. Uses only: $schema $id $ref $defs title description type const enum properties required additionalProperties propertyNames items maxItems minimum maximum minLength maxLength pattern.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "browser_launches",
+    "buckets",
+    "budget",
+    "budget_events",
+    "bypass",
+    "bytes_before_first_navigation",
+    "catalog_versions",
+    "command",
+    "cost",
+    "ended_at",
+    "find",
+    "fixes",
+    "gb_unit",
+    "helper_events",
+    "hosts",
+    "incomplete",
+    "labels",
+    "mode",
+    "non_target",
+    "per_unit",
+    "refused",
+    "schema_version",
+    "started_at",
+    "status_histogram",
+    "success",
+    "tool_version",
+    "totals",
+    "types",
+    "units",
+    "warnings",
+    "what_if"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "tool_version": {
+      "$ref": "#/$defs/version"
+    },
+    "command": {
+      "enum": [
+        "run",
+        "serve",
+        "find"
+      ]
+    },
+    "catalog_versions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "background",
+        "challenges",
+        "direct"
+      ],
+      "properties": {
+        "background": {
+          "$ref": "#/$defs/catalogVersion"
+        },
+        "challenges": {
+          "$ref": "#/$defs/catalogVersion"
+        },
+        "direct": {
+          "$ref": "#/$defs/catalogVersion"
+        }
+      }
+    },
+    "started_at": {
+      "$ref": "#/$defs/timestamp"
+    },
+    "ended_at": {
+      "$ref": "#/$defs/timestamp"
+    },
+    "mode": {
+      "description": "How the meter reached targets; never the upstream host.",
+      "enum": [
+        "direct",
+        "http-connect",
+        "socks5"
+      ]
+    },
+    "gb_unit": {
+      "enum": [
+        "GB",
+        "GiB"
+      ]
+    },
+    "labels": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "allocated",
+        "cost",
+        "hook",
+        "totals"
+      ],
+      "properties": {
+        "totals": {
+          "const": "tunnel-measured"
+        },
+        "allocated": {
+          "const": "allocated"
+        },
+        "hook": {
+          "const": "hook-reported"
+        },
+        "cost": {
+          "const": "estimated billable transfer"
+        },
+        "unattributed": {
+          "description": "What buckets.unattributed and the hosts' 'unattributed' buckets hold in a find report: find's own page load, plus the --verify replay when one was sent, not traffic left unattributed. Optional: only in find reports, and absent from find reports from before round 4.",
+          "enum": [
+            "find page load",
+            "find page load and --verify replay"
+          ]
+        }
+      }
+    },
+    "totals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bytes_received",
+        "bytes_sent",
+        "denied_tunnels",
+        "failed_tunnels",
+        "tunnels",
+        "with_connect",
+        "with_connect_estimated",
+        "without_connect"
+      ],
+      "properties": {
+        "with_connect": {
+          "$ref": "#/$defs/bytes"
+        },
+        "without_connect": {
+          "$ref": "#/$defs/bytes"
+        },
+        "bytes_sent": {
+          "$ref": "#/$defs/bytes"
+        },
+        "bytes_received": {
+          "$ref": "#/$defs/bytes"
+        },
+        "tunnels": {
+          "$ref": "#/$defs/count"
+        },
+        "failed_tunnels": {
+          "$ref": "#/$defs/count"
+        },
+        "denied_tunnels": {
+          "$ref": "#/$defs/count"
+        },
+        "with_connect_estimated": {
+          "type": "boolean"
+        },
+        "connections": {
+          "description": "Upstream connections the meter opened (or tried to open) for the target records counted in 'tunnels'. Fewer than 'tunnels' when a keep-alive plain-HTTP client switched host on the HTTP CONNECT route: the meter keeps the provider connection, and each host gets a record of its own. Optional: absent from reports written before round 4.",
+          "$ref": "#/$defs/count"
+        }
+      }
+    },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "counted_bytes",
+        "limit_bytes",
+        "max_tunnel_bytes",
+        "tripped"
+      ],
+      "properties": {
+        "limit_bytes": {
+          "$ref": "#/$defs/nullableBytes"
+        },
+        "max_tunnel_bytes": {
+          "$ref": "#/$defs/nullableBytes"
+        },
+        "counted_bytes": {
+          "$ref": "#/$defs/bytes"
+        },
+        "tripped": {
+          "type": "boolean"
+        }
+      }
+    },
+    "units": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "count",
+        "low_sample_warning",
+        "source"
+      ],
+      "properties": {
+        "count": {
+          "$ref": "#/$defs/count"
+        },
+        "source": {
+          "enum": [
+            "navigations",
+            "requests",
+            "override",
+            "none"
+          ]
+        },
+        "low_sample_warning": {
+          "type": "boolean"
+        }
+      }
+    },
+    "browser_launches": {
+      "$ref": "#/$defs/count"
+    },
+    "bytes_before_first_navigation": {
+      "$ref": "#/$defs/nullableBytes"
+    },
+    "per_unit": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "first_unit_bytes",
+        "rest_bytes",
+        "rest_mean_bytes",
+        "rest_units",
+        "resolution_s"
+      ],
+      "properties": {
+        "first_unit_bytes": {
+          "$ref": "#/$defs/bytes"
+        },
+        "rest_units": {
+          "$ref": "#/$defs/count"
+        },
+        "rest_bytes": {
+          "$ref": "#/$defs/bytes"
+        },
+        "rest_mean_bytes": {
+          "$ref": "#/$defs/nullableBytes"
+        },
+        "resolution_s": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 60
+        }
+      }
+    },
+    "hosts": {
+      "type": "array",
+      "maxItems": 10000,
+      "items": {
+        "$ref": "#/$defs/hostRow"
+      }
+    },
+    "types": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "$ref": "#/$defs/typeRow"
+      }
+    },
+    "buckets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "attributed",
+        "background",
+        "before_attach",
+        "preconnect_idle",
+        "unattributed"
+      ],
+      "properties": {
+        "attributed": {
+          "$ref": "#/$defs/bytes"
+        },
+        "preconnect_idle": {
+          "$ref": "#/$defs/bytes"
+        },
+        "before_attach": {
+          "$ref": "#/$defs/bytes"
+        },
+        "unattributed": {
+          "description": "Tunnel bytes of hosts no helper request matched that are not background, before_attach or preconnect_idle. In a find report (which writes no helper events) this is find's own page load, plus the --verify replay when sent; labels.unattributed says which.",
+          "$ref": "#/$defs/bytes"
+        },
+        "background": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/bytes"
+          }
+        }
+      }
+    },
+    "non_target": {
+      "type": "array",
+      "maxItems": 1000,
+      "items": {
+        "$ref": "#/$defs/nonTargetRow"
+      }
+    },
+    "status_histogram": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^([0-9]{1,3}|failed)$"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/count"
+      }
+    },
+    "success": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "basis",
+        "count",
+        "rate"
+      ],
+      "properties": {
+        "count": {
+          "$ref": "#/$defs/count"
+        },
+        "basis": {
+          "enum": [
+            "navigations",
+            "requests"
+          ]
+        },
+        "rate": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "find": {
+      "type": "array",
+      "maxItems": 10,
+      "items": {
+        "$ref": "#/$defs/find"
+      }
+    },
+    "budget_events": {
+      "type": "array",
+      "maxItems": 1000,
+      "items": {
+        "$ref": "#/$defs/budgetEvent"
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "$ref": "#/$defs/text"
+      }
+    },
+    "incomplete": {
+      "type": "boolean"
+    },
+    "bypass": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "hosts",
+        "requests"
+      ],
+      "properties": {
+        "hosts": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/$defs/host"
+          }
+        },
+        "requests": {
+          "$ref": "#/$defs/count"
+        }
+      }
+    },
+    "what_if": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "$ref": "#/$defs/whatIf"
+      }
+    },
+    "fixes": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "$ref": "#/$defs/fix"
+      }
+    },
+    "cost": {
+      "description": "Only when --rate was given; label 'estimated billable transfer'.",
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "currency",
+        "label",
+        "per_1000_successes",
+        "per_1000_units",
+        "rate",
+        "rate_unit",
+        "with_connect",
+        "without_connect"
+      ],
+      "properties": {
+        "label": {
+          "const": "estimated billable transfer"
+        },
+        "currency": {
+          "const": "USD"
+        },
+        "rate": {
+          "type": "number",
+          "minimum": 0
+        },
+        "rate_unit": {
+          "enum": [
+            "USD per GB",
+            "USD per GiB"
+          ]
+        },
+        "with_connect": {
+          "$ref": "#/$defs/money"
+        },
+        "without_connect": {
+          "$ref": "#/$defs/money"
+        },
+        "per_1000_units": {
+          "$ref": "#/$defs/nullableMoney"
+        },
+        "per_1000_successes": {
+          "$ref": "#/$defs/nullableMoney"
+        }
+      }
+    },
+    "refused": {
+      "$ref": "#/$defs/counts"
+    },
+    "tunnel_failures": {
+      "description": "Failed target tunnels by failure reason (the part after 'failed:'; upstream_status gets the provider's status code appended, e.g. upstream_status_407). Optional: absent in reports from before round 2.",
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9_]{0,39}$"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/count"
+      }
+    },
+    "accept_limit_errors": {
+      "description": "Times a listener could not accept a connection because the meter process ran out of file descriptors (EMFILE/ENFILE); asyncio then pauses accepting for about 1 s. Optional: absent in reports from before round 2.",
+      "$ref": "#/$defs/count"
+    },
+    "helper_events": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "attach",
+        "dropped",
+        "launch",
+        "request"
+      ],
+      "properties": {
+        "attach": {
+          "$ref": "#/$defs/count"
+        },
+        "launch": {
+          "$ref": "#/$defs/count"
+        },
+        "request": {
+          "$ref": "#/$defs/count"
+        },
+        "dropped": {
+          "$ref": "#/$defs/count"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "count": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "bytes": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "nullableBytes": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "nullableCount": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "timestamp": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,6})?Z$"
+    },
+    "version": {
+      "type": "string",
+      "maxLength": 64,
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+([.+-][0-9A-Za-z.+-]{1,48})?$"
+    },
+    "catalogVersion": {
+      "type": "string",
+      "pattern": "^[0-9A-Za-z.+-]{1,32}$"
+    },
+    "host": {
+      "description": "Lowercase hostname or IP literal (IPv6 without brackets); with --redact-hosts 'redacted:<12 hex>' or 'catalog:<id>'.",
+      "type": "string",
+      "pattern": "^[a-z0-9_.:-]{1,253}$"
+    },
+    "nullableHost": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-z0-9_.:-]{1,253}$"
+    },
+    "path": {
+      "description": "URL path only (never a query or fragment); present only with --keep-urls.",
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^/[!\\x22\\x24-\\x3e\\x40-\\x7e]{0,511}$"
+    },
+    "catalogId": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$"
+    },
+    "nullableCatalogId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$"
+    },
+    "resourceType": {
+      "type": "string",
+      "pattern": "^[a-z_]{1,32}$"
+    },
+    "port": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535
+    },
+    "text": {
+      "description": "One line of sanitised text (safe_text): no characters of the Unicode categories Cc, Cf, Zl, Zp or Cs (controls, C1, format characters such as bidi marks, overrides, isolates and zero-width characters, the BOM, line and paragraph separators, lone surrogates), as of Unicode 15.0.0.",
+      "type": "string",
+      "maxLength": 500,
+      "pattern": "^[^\\x00-\\x1f\\x7f-\\x9f\\xad\\u0600-\\u0605\\u061c\\u06dd\\u070f\\u0890-\\u0891\\u08e2\\u180e\\u200b-\\u200f\\u2028-\\u202e\\u2060-\\u2064\\u2066-\\u206f\\ud800-\\udfff\\ufeff\\ufff9-\\ufffb\ud804\udcbd\ud804\udccd\ud80d\udc30-\ud80d\udc3f\ud82f\udca0-\ud82f\udca3\ud834\udd73-\ud834\udd7a\udb40\udc01\udb40\udc20-\udb40\udc7f]*$"
+    },
+    "nullableText": {
+      "description": "Like text (same pattern: no characters of the Unicode categories Cc, Cf, Zl, Zp or Cs), or null.",
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 500,
+      "pattern": "^[^\\x00-\\x1f\\x7f-\\x9f\\xad\\u0600-\\u0605\\u061c\\u06dd\\u070f\\u0890-\\u0891\\u08e2\\u180e\\u200b-\\u200f\\u2028-\\u202e\\u2060-\\u2064\\u2066-\\u206f\\ud800-\\udfff\\ufeff\\ufff9-\\ufffb\ud804\udcbd\ud804\udccd\ud80d\udc30-\ud80d\udc3f\ud82f\udca0-\ud82f\udca3\ud834\udd73-\ud834\udd7a\udb40\udc01\udb40\udc20-\udb40\udc7f]*$"
+    },
+    "code": {
+      "description": "Generated snippet (safe_code): newlines and tabs allowed; otherwise the same characters as text are excluded.",
+      "type": "string",
+      "maxLength": 8000,
+      "pattern": "^[^\\x00-\\x08\\x0b-\\x1f\\x7f-\\x9f\\xad\\u0600-\\u0605\\u061c\\u06dd\\u070f\\u0890-\\u0891\\u08e2\\u180e\\u200b-\\u200f\\u2028-\\u202e\\u2060-\\u2064\\u2066-\\u206f\\ud800-\\udfff\\ufeff\\ufff9-\\ufffb\ud804\udcbd\ud804\udccd\ud80d\udc30-\ud80d\udc3f\ud82f\udca0-\ud82f\udca3\ud834\udd73-\ud834\udd7a\udb40\udc01\udb40\udc20-\udb40\udc7f]*$"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$"
+    },
+    "textList": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "$ref": "#/$defs/text"
+      }
+    },
+    "counts": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[a-z_]{1,32}$"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/count"
+      }
+    },
+    "bucketTally": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bytes",
+        "tunnels"
+      ],
+      "properties": {
+        "tunnels": {
+          "$ref": "#/$defs/count"
+        },
+        "bytes": {
+          "$ref": "#/$defs/bytes"
+        }
+      }
+    },
+    "hostBytes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bytes",
+        "host"
+      ],
+      "properties": {
+        "host": {
+          "$ref": "#/$defs/host"
+        },
+        "bytes": {
+          "$ref": "#/$defs/bytes"
+        }
+      }
+    },
+    "pathBytes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "reported_bytes",
+        "requests"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^/[!\\x22\\x24-\\x3e\\x40-\\x7e]{0,511}$"
+        },
+        "requests": {
+          "$ref": "#/$defs/count"
+        },
+        "reported_bytes": {
+          "$ref": "#/$defs/bytes"
+        }
+      }
+    },
+    "hostRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "allocated_by_type",
+        "background_id",
+        "buckets",
+        "bytes_received",
+        "bytes_sent",
+        "bytes_with_connect",
+        "bytes_without_connect",
+        "denied_tunnels",
+        "failed_tunnels",
+        "host",
+        "paths",
+        "ports",
+        "requests",
+        "tunnels"
+      ],
+      "properties": {
+        "host": {
+          "$ref": "#/$defs/host"
+        },
+        "ports": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "$ref": "#/$defs/port"
+          }
+        },
+        "tunnels": {
+          "$ref": "#/$defs/count"
+        },
+        "failed_tunnels": {
+          "$ref": "#/$defs/count"
+        },
+        "denied_tunnels": {
+          "$ref": "#/$defs/count"
+        },
+        "bytes_sent": {
+          "$ref": "#/$defs/bytes"
+        },
+        "bytes_received": {
+          "$ref": "#/$defs/bytes"
+        },
+        "bytes_with_connect": {
+          "$ref": "#/$defs/bytes"
+        },
+        "bytes_without_connect": {
+          "$ref": "#/$defs/bytes"
+        },
+        "requests": {
+          "description": "Network requests helpers and hooks reported for this host. Always 0 in a find report: find writes no helper events; its responses are counted in find[].responses_total.",
+          "$ref": "#/$defs/count"
+        },
+        "buckets": {
+          "description": "Bucket name -> {tunnels, bytes}; names: attributed, preconnect_idle, before_attach, unattributed, background:<catalog id>. In a find report 'unattributed' is find's own page load (see labels.unattributed).",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^(attributed|preconnect_idle|before_attach|unattributed|background:[a-z0-9][a-z0-9_-]{0,63})$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/bucketTally"
+          }
+        },
+        "allocated_by_type": {
+          "description": "Resource type -> allocated bytes (allocated label).",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z_]{1,32}$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/bytes"
+          }
+        },
+        "background_id": {
+          "$ref": "#/$defs/nullableCatalogId"
+        },
+        "paths": {
+          "type": "array",
+          "maxItems": 20,
+          "items": {
+            "$ref": "#/$defs/pathBytes"
+          }
+        }
+      }
+    },
+    "typeRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "allocated_bytes",
+        "reported_bytes",
+        "requests",
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/resourceType"
+        },
+        "requests": {
+          "$ref": "#/$defs/count"
+        },
+        "reported_bytes": {
+          "$ref": "#/$defs/bytes"
+        },
+        "allocated_bytes": {
+          "$ref": "#/$defs/bytes"
+        }
+      }
+    },
+    "nonTargetRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bytes_received",
+        "bytes_sent",
+        "catalog_id",
+        "host",
+        "tunnels"
+      ],
+      "properties": {
+        "host": {
+          "$ref": "#/$defs/host"
+        },
+        "catalog_id": {
+          "$ref": "#/$defs/catalogId"
+        },
+        "tunnels": {
+          "$ref": "#/$defs/count"
+        },
+        "bytes_sent": {
+          "$ref": "#/$defs/bytes"
+        },
+        "bytes_received": {
+          "$ref": "#/$defs/bytes"
+        }
+      }
+    },
+    "challenge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "blocked",
+        "signals",
+        "status",
+        "vendor_id",
+        "vendor_name"
+      ],
+      "properties": {
+        "blocked": {
+          "type": "boolean"
+        },
+        "vendor_id": {
+          "$ref": "#/$defs/nullableCatalogId"
+        },
+        "vendor_name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 64,
+          "pattern": "^[\\x20-\\x7e]{1,64}$"
+        },
+        "signals": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,63}:(header|cookie|status|body):[\\x21-\\x7e]{1,128}$"
+          }
+        },
+        "status": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 999
+        }
+      }
+    },
+    "findFlags": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "non_get",
+        "random_query_token",
+        "sent_authorization",
+        "sent_cookies",
+        "third_party"
+      ],
+      "properties": {
+        "sent_cookies": {
+          "type": "boolean"
+        },
+        "sent_authorization": {
+          "type": "boolean"
+        },
+        "random_query_token": {
+          "type": "boolean"
+        },
+        "third_party": {
+          "type": "boolean"
+        },
+        "non_get": {
+          "type": "boolean"
+        },
+        "sent_token_header": {
+          "type": "boolean"
+        }
+      }
+    },
+    "findMatch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "all_values",
+        "billed_basis_bytes",
+        "code_eligible",
+        "code_ineligible_reason",
+        "encoded_body_bytes",
+        "flags",
+        "host",
+        "locations",
+        "match_kinds",
+        "method",
+        "mime_type",
+        "path",
+        "port",
+        "rank",
+        "request_header_bytes",
+        "resource_type",
+        "response_header_bytes",
+        "scheme",
+        "status",
+        "tls_handshake_estimate",
+        "values_matched"
+      ],
+      "properties": {
+        "rank": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "host": {
+          "$ref": "#/$defs/host"
+        },
+        "port": {
+          "$ref": "#/$defs/port"
+        },
+        "scheme": {
+          "enum": [
+            "http",
+            "https"
+          ]
+        },
+        "path": {
+          "$ref": "#/$defs/path"
+        },
+        "method": {
+          "type": "string",
+          "pattern": "^[A-Z]{1,16}$"
+        },
+        "resource_type": {
+          "$ref": "#/$defs/resourceType"
+        },
+        "status": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 999
+        },
+        "mime_type": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[a-z0-9!#$&^_.+-]{1,64}/[a-z0-9!#$&^_.+-]{1,64}$"
+        },
+        "all_values": {
+          "type": "boolean"
+        },
+        "values_matched": {
+          "$ref": "#/$defs/count"
+        },
+        "match_kinds": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "type": "string",
+            "pattern": "^(exact|none|variant:[a-z0-9-]{1,32})$"
+          }
+        },
+        "locations": {
+          "type": "array",
+          "maxItems": 20,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9+_-]{0,31}(:[A-Za-z0-9_.$@\\[\\]-]{1,128})?$"
+          }
+        },
+        "encoded_body_bytes": {
+          "$ref": "#/$defs/bytes"
+        },
+        "response_header_bytes": {
+          "$ref": "#/$defs/bytes"
+        },
+        "request_header_bytes": {
+          "$ref": "#/$defs/bytes"
+        },
+        "tls_handshake_estimate": {
+          "$ref": "#/$defs/bytes"
+        },
+        "billed_basis_bytes": {
+          "$ref": "#/$defs/bytes"
+        },
+        "flags": {
+          "$ref": "#/$defs/findFlags"
+        },
+        "code_eligible": {
+          "type": "boolean"
+        },
+        "code_ineligible_reason": {
+          "$ref": "#/$defs/nullableText"
+        },
+        "content_encoding": {
+          "description": "Content-Encoding of the matched response as the browser received it (br, gzip, zstd...), or null. A client that cannot accept the same encoding receives a larger body.",
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[a-z0-9._+-]{1,32}(, ?[a-z0-9._+-]{1,32})*$",
+          "maxLength": 32
+        },
+        "multiplexed": {
+          "description": "HTTP/2 or HTTP/3: DevTools has no separate header sizes; both header fields are 0, the encoded body includes the response header frames and request headers are left out of the billed basis.",
+          "type": "boolean"
+        },
+        "locations_by_value": {
+          "description": "One list per searched value, in order: where that value matched. Never the value itself.",
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9+_-]{0,31}(:[A-Za-z0-9_.$@\\[\\]-]{1,128})?$"
+            }
+          }
+        }
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "inspected",
+        "line",
+        "skipped"
+      ],
+      "properties": {
+        "inspected": {
+          "$ref": "#/$defs/count"
+        },
+        "skipped": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^(over_cap|evicted|no_session|websocket|binary|failed|no_body|challenge|other)$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/count"
+          }
+        },
+        "line": {
+          "$ref": "#/$defs/text"
+        }
+      }
+    },
+    "verify": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reason",
+        "received_bytes",
+        "replays",
+        "status"
+      ],
+      "properties": {
+        "replays": {
+          "enum": [
+            "yes",
+            "no",
+            "not_tested"
+          ]
+        },
+        "status": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 999
+        },
+        "received_bytes": {
+          "$ref": "#/$defs/nullableBytes"
+        },
+        "reason": {
+          "$ref": "#/$defs/nullableText"
+        },
+        "replay_billed_basis_bytes": {
+          "description": "The replay's body bytes received + its header bytes + the match's TLS estimate; null when no response arrived.",
+          "$ref": "#/$defs/nullableBytes"
+        }
+      }
+    },
+    "find": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "challenge",
+        "coverage",
+        "matches",
+        "page_reported_bytes",
+        "responses_total",
+        "short_value_warning",
+        "status",
+        "target_host",
+        "target_path",
+        "values_count",
+        "verify",
+        "warnings"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "found",
+            "not_found",
+            "blocked",
+            "error"
+          ]
+        },
+        "target_host": {
+          "$ref": "#/$defs/host"
+        },
+        "target_path": {
+          "$ref": "#/$defs/path"
+        },
+        "values_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        },
+        "short_value_warning": {
+          "type": "boolean"
+        },
+        "challenge": {
+          "$ref": "#/$defs/challenge"
+        },
+        "matches": {
+          "type": "array",
+          "maxItems": 20,
+          "items": {
+            "$ref": "#/$defs/findMatch"
+          }
+        },
+        "coverage": {
+          "$ref": "#/$defs/coverage"
+        },
+        "verify": {
+          "$ref": "#/$defs/verify"
+        },
+        "responses_total": {
+          "$ref": "#/$defs/count"
+        },
+        "page_reported_bytes": {
+          "$ref": "#/$defs/bytes"
+        },
+        "warnings": {
+          "$ref": "#/$defs/textList"
+        }
+      }
+    },
+    "budgetEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "closed_tunnels",
+        "counted_bytes",
+        "host",
+        "kind",
+        "limit_bytes",
+        "top_hosts",
+        "ts",
+        "tunnel_id"
+      ],
+      "properties": {
+        "ts": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "kind": {
+          "enum": [
+            "warn_80",
+            "tripped",
+            "tunnel_cap"
+          ]
+        },
+        "counted_bytes": {
+          "$ref": "#/$defs/bytes"
+        },
+        "limit_bytes": {
+          "$ref": "#/$defs/nullableBytes"
+        },
+        "tunnel_id": {
+          "$ref": "#/$defs/nullableCount"
+        },
+        "host": {
+          "$ref": "#/$defs/nullableHost"
+        },
+        "top_hosts": {
+          "type": "array",
+          "maxItems": 10,
+          "items": {
+            "$ref": "#/$defs/hostBytes"
+          }
+        },
+        "closed_tunnels": {
+          "$ref": "#/$defs/count"
+        }
+      }
+    },
+    "whatIf": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "basis",
+        "bytes_saved",
+        "caveats",
+        "id",
+        "share",
+        "title"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "title": {
+          "$ref": "#/$defs/text"
+        },
+        "bytes_saved": {
+          "$ref": "#/$defs/bytes"
+        },
+        "share": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "basis": {
+          "const": "allocated"
+        },
+        "caveats": {
+          "$ref": "#/$defs/textList"
+        }
+      }
+    },
+    "fix": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "caveats",
+        "code",
+        "detection",
+        "id",
+        "language",
+        "title"
+      ],
+      "properties": {
+        "id": {
+          "description": "A fix id this version generates; renderers rebuild the fix from it for reports read from files.",
+          "enum": [
+            "playwright-cdp-block",
+            "playwright-route-block",
+            "chromium-background-flags",
+            "playwright-mcp-flags",
+            "requests-session-reuse",
+            "httpx-client-reuse"
+          ]
+        },
+        "title": {
+          "$ref": "#/$defs/text"
+        },
+        "detection": {
+          "$ref": "#/$defs/text"
+        },
+        "language": {
+          "enum": [
+            "python",
+            "shell",
+            "json",
+            "text"
+          ]
+        },
+        "code": {
+          "$ref": "#/$defs/code"
+        },
+        "caveats": {
+          "$ref": "#/$defs/textList"
+        }
+      }
+    },
+    "money": {
+      "type": "number",
+      "minimum": 0
+    },
+    "nullableMoney": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    }
+  }
+}
