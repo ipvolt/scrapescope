@@ -13,6 +13,7 @@ from pathlib import Path
 import pytest
 
 from scrapescope.catalog import load_catalogs
+from scrapescope.find.core import SANDBOX_WARNING
 from tests.e2e_support import (
     PYTHON,
     assert_absent,
@@ -25,7 +26,7 @@ from tests.e2e_support import (
     write_script,
 )
 from tests.fixtures import UPSTREAM_PASSWORD, UPSTREAM_USERNAME, TestWorld, site
-from tests.fixtures.browser import PAGE_DONE_PREDICATE, chromium_unavailable_reason
+from tests.fixtures.browser import PAGE_DONE_PREDICATE, chromium_sandbox_unavailable_reason, chromium_unavailable_reason
 
 pytestmark = [pytest.mark.browser, pytest.mark.timeout(180)]
 
@@ -161,10 +162,18 @@ def test_find_through_upstream_finds_verifies_and_keeps_the_value_private(fresh_
     assert "replays without a browser: yes" in proc.stdout
     assert "curl --compressed 'https://origin-a.test/api/product.json'" in proc.stdout
     assert "meter: the page load" in proc.stdout and "tunnel-measured" in proc.stdout
-    assert "OS sandbox" not in proc.stdout  # the sandboxed launch works on this machine
     report = load_report(out)
     assert report["command"] == "find" and report["mode"] == "http-connect"
     assert not any("helper events" in w or "unit" in w for w in report["warnings"])  # no run-only noise
+    # The sandbox fallback note appears exactly when Chromium cannot start with its OS sandbox on this
+    # machine (probed with the same sandboxed launch find makes first); the output above is complete either
+    # way. Where the sandbox works (macOS, most Linux hosts) this is the strict form: no note at all.
+    sandbox_blocked = chromium_sandbox_unavailable_reason()
+    if sandbox_blocked is None:
+        assert "OS sandbox" not in proc.stdout and SANDBOX_WARNING not in report["warnings"]
+    else:
+        assert f"  - {SANDBOX_WARNING}" in proc.stdout, sandbox_blocked
+        assert SANDBOX_WARNING in report["warnings"]
     entry = report["find"][0]
     assert entry["status"] == "found" and entry["verify"]["replays"] == "yes"
     matches = entry["matches"]

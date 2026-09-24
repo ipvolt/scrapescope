@@ -465,7 +465,10 @@ connection still gets `502 upstream-closed`.
   replace the sent size with the length of the client's own CONNECT head as it
   would be forwarded to an HTTP CONNECT upstream, without `Proxy-Authorization`
   (`Meter.set_synthetic_request_bytes`; Chromium's head is about 236 bytes, the
-  minimal one 63 for `origin-a.test:443`). Provider credentials are not
+  minimal HTTP/1.1 one 63 for `origin-a.test:443`; a head the client sent
+  without `Host`, as Python 3.11's `http.client` does with `CONNECT host:port
+  HTTP/1.0`, 38 bytes, is estimated at its own size: the `Host` injected for
+  h11 is stripped again before forwarding). Provider credentials are not
   included. Not added to upstream bytes or the budget; they make the
   with-CONNECT figure an estimate. Round 3 (meas3-9, documented, not
   estimated): plain-HTTP requests in direct mode go to the target in origin

@@ -104,7 +104,7 @@ they carry `Vary: Accept-Encoding`. The only non-deterministic bytes are the
 
 | Path | Notes |
 |---|---|
-| `/big.bin?size=N[&chunk=C][&delay_ms=D]` | Exactly N deterministic bytes (`site.big_bytes`), `Content-Length`, streamed in chunks of C (<= 64 KiB) with an optional delay between chunks |
+| `/big.bin?size=N[&chunk=C][&delay_ms=D][&stall_after=S]` | Exactly N deterministic bytes (`site.big_bytes`), `Content-Length`, streamed in chunks of C (<= 64 KiB) with an optional delay between chunks. With `stall_after=S` (S < N) the origin sends exactly S body bytes, then stops and waits for the client to go away (60 s at most) before closing the incomplete response: a transfer of known size for tests of aborted requests |
 | `/chunked?n=K&size=S` | Chunked response of K chunks of S bytes (S capped at 65,536) |
 | `/close-delimited?size=N` | HTTP/1.1 response without length, `Connection: close` |
 | `/status/<code>` | That status for 200-599 (204/304 without body); other codes get 400 |
