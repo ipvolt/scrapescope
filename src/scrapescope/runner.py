@@ -1000,16 +1000,14 @@ def _serve(
 # ---------------------------------------------------------------------------
 
 
-#: find without the Playwright package (exit 3). The same commands as the README's install section
-#: (the package is installed from GitHub; it is not on PyPI yet).
+#: find without the Playwright package (exit 3). The same commands as the README's install section.
 _INSTALL_PLAYWRIGHT = (
     "find needs Playwright, which is not installed where scrapescope runs. Install the browser extra and "
     "Playwright's Chromium, matching how you installed scrapescope:",
-    "  uv tool:  uv tool install 'scrapescope[browser] @ git+https://github.com/ipvolt/scrapescope'"
-    " --with-executables-from playwright && playwright install chromium",
+    "  uv tool:  uv tool install 'scrapescope[browser]' --with-executables-from playwright"
+    " && playwright install chromium",
     "  pipx:     pipx inject --include-apps scrapescope playwright && playwright install chromium",
-    "  pip:      pip install 'scrapescope[browser] @ git+https://github.com/ipvolt/scrapescope'"
-    " && python -m playwright install chromium",
+    "  pip:      pip install 'scrapescope[browser]' && python -m playwright install chromium",
 )
 #: find with Playwright present but Chromium failing to start (exit 3).
 _INSTALL_CHROMIUM = (

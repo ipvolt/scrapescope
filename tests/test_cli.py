@@ -437,11 +437,11 @@ def test_find_checks_for_playwright_before_starting_the_meter(
     assert main(["find", "https://origin-a.test/", "--value", "v", "--direct", "--out", str(out)]) == 3
     err = capsys.readouterr().err
     assert "through the meter" not in err and seen == {} and not out.exists()
-    # The package is installed from GitHub, not PyPI: every recipe names the repository.
-    repo = "git+https://github.com/ipvolt/scrapescope"
-    assert f"uv tool install 'scrapescope[browser] @ {repo}' --with-executables-from playwright" in err
+    # The recipes install the published package, so they match the installed version, not git main.
+    assert "uv tool install 'scrapescope[browser]' --with-executables-from playwright" in err
     assert "pipx inject --include-apps scrapescope playwright" in err
-    assert f"pip install 'scrapescope[browser] @ {repo}'" in err
+    assert "pip install 'scrapescope[browser]'" in err
+    assert "git+https://" not in err
     assert "uvx scrapescope" not in err and "pipx install scrapescope" not in err
 
 
