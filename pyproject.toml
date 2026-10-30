@@ -16,12 +16,16 @@ classifiers = [
     "Development Status :: 3 - Alpha",
     "Environment :: Console",
     "Intended Audience :: Developers",
-    # Only what the test suite has run on (pkg-1): macOS with Python 3.12. Linux and the other
-    # Python versions are added once the CI jobs in .github/workflows/ci.yml have passed there.
+    # Only what the CI jobs in .github/workflows/ci.yml pass on (release checklist, item 11):
+    # Linux (Ubuntu 22.04 and 24.04) and macOS, Python 3.11 to 3.14. Windows is untested.
     "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Internet :: Proxy Servers",
     "Topic :: Software Development :: Testing",
 ]
@@ -46,7 +50,7 @@ dev = [
 scrapescope = "scrapescope.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/ipvolt/scrapescope"
+Homepage = "https://ipvolt.com/guides/scraper-bandwidth-report"
 Source = "https://github.com/ipvolt/scrapescope"
 Issues = "https://github.com/ipvolt/scrapescope/issues"
 

@@ -11,18 +11,16 @@ any provider or none and never contacts ipvolt.
 **It stays free.** ipvolt commits that scrapescope stays free and MIT-licensed.
 There is no paid tier, licence key, usage limit or feature held back for ipvolt
 customers. It has no default provider, rate or account, no telemetry and no
-update checks. The full commitment is in [NOTICE](NOTICE). If a release breaks
-it, report that as a bug ([SECURITY.md](SECURITY.md)).
+update checks. The full commitment is in [NOTICE](https://github.com/ipvolt/scrapescope/blob/main/NOTICE). If a release breaks
+it, report that as a bug ([SECURITY.md](https://github.com/ipvolt/scrapescope/blob/main/SECURITY.md)).
 
-> **Status: 0.1.0, pre-release.** Installed from GitHub; not yet published on
-> PyPI (publication there is planned). The docs were checked against the
-> implementation on 2026-09-24, after the fourth review round;
-> [docs/method.md](docs/method.md#claims-to-verify) lists each behaviour claim
-> with the test that covers it and the ones that are still open. The test
-> suite has run on macOS with Python 3.12. A CI workflow for Linux and macOS
-> with Python 3.11 to 3.14 is in `.github/workflows/` and runs on every push
-> and pull request; until its first run has passed, Linux is expected to work
-> but is untested. Windows is untested.
+> **Status: 0.1.0, pre-release.** Published on PyPI as `scrapescope`. The
+> docs were checked against the implementation on 2026-09-24, after the fourth
+> review round; [docs/method.md](https://github.com/ipvolt/scrapescope/blob/main/docs/method.md#claims-to-verify) lists each
+> behaviour claim with the test that covers it and the ones that are still
+> open. The CI workflow in `.github/workflows/` runs the test suite on Linux
+> (Ubuntu 22.04 and 24.04) and macOS with Python 3.11 to 3.14 on every push
+> and pull request. Windows is untested.
 
 ---
 
@@ -66,7 +64,7 @@ joins those counts to what the browser helper reports. From that it produces:
   on), allocated from the tunnel totals;
 - traffic the browser started by itself, labelled with a catalogued component
   such as Chromium's optimisation-guide model downloads, but only when the host
-  is in the evidence-backed [background catalog](src/scrapescope/catalog/background.json);
+  is in the evidence-backed [background catalog](https://github.com/ipvolt/scrapescope/blob/main/src/scrapescope/catalog/background.json);
 - idle preconnects, bytes before the helper attached, and bytes it cannot
   attribute, each shown separately rather than guessed;
 - a what-if for blocking images, media and fonts or denying catalogued
@@ -94,50 +92,59 @@ measurements on your machine, not your provider's bill (see
 
 ## Install
 
-scrapescope is not on PyPI yet (publication there is planned), so install it
-from GitHub. It needs Python 3.11 or newer and `git` on your `PATH`. `uv`
+scrapescope is published on PyPI. It needs Python 3.11 or newer. `uv`
 downloads a suitable Python for you if needed; pipx uses its default Python
 unless you name one.
 
 ```sh
-uv tool install 'scrapescope @ git+https://github.com/ipvolt/scrapescope'    # install the command
-pipx install 'scrapescope @ git+https://github.com/ipvolt/scrapescope'       # alternative; its Python must be 3.11 or newer
-uvx --from 'scrapescope @ git+https://github.com/ipvolt/scrapescope' scrapescope --help   # run without installing
+uv tool install scrapescope    # install the command
+pipx install scrapescope       # alternative; its Python must be 3.11 or newer
+pip install scrapescope        # into your project's own virtual environment
+uvx scrapescope --help         # run without installing
 ```
 
 With pipx, `--python python3.13` (any `python3.11` or newer on your `PATH`)
 picks the interpreter, and pipx 1.5 or later can fetch one with
-`--fetch-missing-python --python 3.12`. To install a particular tag or commit,
-append `@<tag-or-commit>` to the URL.
+`--fetch-missing-python --python 3.12`. To install a particular release, pin
+it, for example `scrapescope==0.1.0`.
 
 `find` and the Playwright helper need the optional browser extra and
 Playwright's Chromium. Install Chromium with the Playwright from the same
 environment, so the browser build matches:
 
 ```sh
-uv tool install 'scrapescope[browser] @ git+https://github.com/ipvolt/scrapescope' --with-executables-from playwright
+uv tool install 'scrapescope[browser]' --with-executables-from playwright
 playwright install chromium
 
 # or with pipx: install without the extra, then inject Playwright with its command
 # (add --python python3.13, or any python3.11 or newer, if pipx's default is older)
-pipx install 'scrapescope @ git+https://github.com/ipvolt/scrapescope'
+pipx install scrapescope
 pipx inject --include-apps scrapescope playwright
 playwright install chromium
 
 # or in your project's own virtual environment
-pip install 'scrapescope[browser] @ git+https://github.com/ipvolt/scrapescope' && python -m playwright install chromium
+pip install 'scrapescope[browser]' && python -m playwright install chromium
 ```
 
 If you use the Playwright helper or the hooks inside your own job, install
 `scrapescope` in the job's environment too, so that `import scrapescope.helpers`
 works there.
 
-From a clone of this repository, `pip install -e '.[browser]'` installs it
-editable; [CONTRIBUTING.md](CONTRIBUTING.md) has the development setup.
+To install from GitHub instead, for unreleased changes or a particular tag
+or commit, use a direct reference (this needs `git` on your `PATH`; append
+`@<tag-or-commit>` to the URL to pin a revision):
 
-The test suite has run on macOS with Python 3.12. Linux is expected to work but
-has not been tested yet (the CI workflow runs the suite there on every push).
-Windows is untested in v1. Stopping a job's process group is implemented for
+```sh
+uv tool install 'scrapescope @ git+https://github.com/ipvolt/scrapescope'
+pipx install 'scrapescope @ git+https://github.com/ipvolt/scrapescope'
+pip install 'scrapescope[browser] @ git+https://github.com/ipvolt/scrapescope'
+```
+
+From a clone of this repository, `pip install -e '.[browser]'` installs it
+editable; [CONTRIBUTING.md](https://github.com/ipvolt/scrapescope/blob/main/CONTRIBUTING.md) has the development setup.
+
+The test suite runs in CI on Linux (Ubuntu 22.04 and 24.04) and macOS with
+Python 3.11 to 3.14. Windows is untested in v1. Stopping a job's process group is implemented for
 POSIX systems only.
 
 Each tunnel costs the meter two file descriptors. `run`, `serve` and `find`
@@ -191,7 +198,7 @@ scrapescope find 'https://books.toscrape.com/catalogue/a-light-in-the-attic_1000
   found". When a page's own sub-request, a redirect, or a later request to a
   name that moved is refused, `find` says so and mentions the option only
   with a warning to use it for a page or site you trust
-  ([docs/security.md](docs/security.md#sizing-mode-and-private-addresses)).
+  ([docs/security.md](https://github.com/ipvolt/scrapescope/blob/main/docs/security.md#sizing-mode-and-private-addresses)).
 - The result starts with a header (`scrapescope find: <host/path>  (N
   values)`), then the coverage line (`searched N inspected responses; skipped:
   ...`, or `not found in N inspected responses; skipped: ...`), a summary line
@@ -239,7 +246,7 @@ scrapescope find 'https://books.toscrape.com/catalogue/a-light-in-the-attic_1000
   at least one value was in none of them, 1 when nothing matched, 4 when the
   page was a challenge or block page, 5 when the page did not load (including
   a target the meter refused), 3 when Playwright or its Chromium is missing,
-  and 130 on Ctrl-C, without a report ([docs/exit-codes.md](docs/exit-codes.md)).
+  and 130 on Ctrl-C, without a report ([docs/exit-codes.md](https://github.com/ipvolt/scrapescope/blob/main/docs/exit-codes.md)).
   With `--quiet`, `find` drops only its progress notes on stderr; the result
   and the `meter:` line still go to stdout.
 
@@ -289,7 +296,7 @@ one of those is set instead).
 When the job exits, scrapescope prints a summary to stderr, writes
 `scrapescope-report.json` (`--out PATH` to change it, `--html PATH` for an
 offline HTML table) and exits with the job's own exit code, or with one of the
-codes in [docs/exit-codes.md](docs/exit-codes.md).
+codes in [docs/exit-codes.md](https://github.com/ipvolt/scrapescope/blob/main/docs/exit-codes.md).
 
 ### Sizing mode: measure before you buy
 
@@ -302,7 +309,7 @@ account. `--env-all` points every proxy-aware client in the job at scrapescope:
 it sets `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY` and their lowercase forms,
 `NODE_USE_ENV_PROXY=1`, and adds `127.0.0.1,localhost,::1` to `NO_PROXY`.
 Under `--env-all`, the LLM API hosts listed in
-[direct.json](src/scrapescope/catalog/direct.json) (for example
+[direct.json](https://github.com/ipvolt/scrapescope/blob/main/src/scrapescope/catalog/direct.json) (for example
 `api.openai.com`) always go direct, never to a paid proxy, and are reported
 separately as "non-target". **They go direct even when you use `--env-all` with
 a provider: scrapescope resolves those names and connects from your own IP
@@ -444,7 +451,7 @@ With `ss-<token>` alone, scrapescope uses the credentials from
 `--upstream-from-env`. With `ss-<token>~<provider-username>`, it strips its own
 prefix and sends your username and password to the provider. The report is
 rewritten every 60 seconds and on exit; it keeps no byte timeline, which only
-`run`'s per-unit figures use. See [docs/security.md](docs/security.md) for
+`run`'s per-unit figures use. See [docs/security.md](https://github.com/ipvolt/scrapescope/blob/main/docs/security.md) for
 the token and the listener.
 
 ### report: re-render or gate a saved report
@@ -515,7 +522,7 @@ a local meter, because their proxy traffic leaves from the cloud.
   including or excluding failed requests. Costs are labelled "estimated
   billable transfer". No reconciliation against a provider's billing has been
   published yet; until one exists for a kind of workload, nothing here is
-  billing-grade. See [docs/accuracy.md](docs/accuracy.md).
+  billing-grade. See [docs/accuracy.md](https://github.com/ipvolt/scrapescope/blob/main/docs/accuracy.md).
 - **Tunnel-measured versus allocated.** Per-host totals are measured.
   Per-request and per-type bytes are allocated: each host's tunnel bytes shared
   in proportion to the reported sizes, scaled down or up. Scaling up is capped
@@ -552,7 +559,7 @@ a local meter, because their proxy traffic leaves from the cloud.
 - **Sizing mode is a lower bound for protected sites,** and its "with CONNECT"
   figure is an estimate. For plain `http://` requests it adds nothing: a
   provider would also receive each request's absolute-form target and your
-  credentials line ([accuracy.md](docs/accuracy.md#sizing-mode)).
+  credentials line ([accuracy.md](https://github.com/ipvolt/scrapescope/blob/main/docs/accuracy.md#sizing-mode)).
 - **The bypass check sees only instrumented clients.** It catches requests to
   hosts no tunnel carried, requests after a host's tunnels had closed, and
   hosts whose reported bytes far exceed what their tunnels carried. Traffic
@@ -651,24 +658,24 @@ release.
 - Some challenge-page patterns are adapted from **is-antibot**
   ([github.com/microlinkhq/is-antibot](https://github.com/microlinkhq/is-antibot),
   MIT, Copyright © 2025 Microlink). They are used only to recognise a challenge
-  page, never to get past one; [NOTICE](NOTICE) lists them and reproduces
+  page, never to get past one; [NOTICE](https://github.com/ipvolt/scrapescope/blob/main/NOTICE) lists them and reproduces
   is-antibot's licence notice.
 
 ## Documentation
 
-- [docs/method.md](docs/method.md): how counting, attribution, the budget and
+- [docs/method.md](https://github.com/ipvolt/scrapescope/blob/main/docs/method.md): how counting, attribution, the budget and
   `find` work, with the list of behaviour claims and their test status
-- [docs/accuracy.md](docs/accuracy.md): what each figure means and how it can
+- [docs/accuracy.md](https://github.com/ipvolt/scrapescope/blob/main/docs/accuracy.md): what each figure means and how it can
   differ from a bill
-- [docs/security.md](docs/security.md): threat model, listeners, tokens and
+- [docs/security.md](https://github.com/ipvolt/scrapescope/blob/main/docs/security.md): threat model, listeners, tokens and
   credential handling
-- [docs/privacy.md](docs/privacy.md): exactly what is and is not stored
-- [docs/exit-codes.md](docs/exit-codes.md): exit codes for scripts and CI
-- [CONTRIBUTING.md](CONTRIBUTING.md): development, tests and catalog entries
+- [docs/privacy.md](https://github.com/ipvolt/scrapescope/blob/main/docs/privacy.md): exactly what is and is not stored
+- [docs/exit-codes.md](https://github.com/ipvolt/scrapescope/blob/main/docs/exit-codes.md): exit codes for scripts and CI
+- [CONTRIBUTING.md](https://github.com/ipvolt/scrapescope/blob/main/CONTRIBUTING.md): development, tests and catalog entries
   with evidence
-- [SECURITY.md](SECURITY.md): reporting a vulnerability
+- [SECURITY.md](https://github.com/ipvolt/scrapescope/blob/main/SECURITY.md): reporting a vulnerability
 
 ## Licence
 
-MIT; see [LICENSE](LICENSE). [NOTICE](NOTICE) holds ipvolt's stays-free
+MIT; see [LICENSE](https://github.com/ipvolt/scrapescope/blob/main/LICENSE). [NOTICE](https://github.com/ipvolt/scrapescope/blob/main/NOTICE) holds ipvolt's stays-free
 commitment and third-party attributions.

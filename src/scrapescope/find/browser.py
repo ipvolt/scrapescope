@@ -112,14 +112,12 @@ class BrowserUnavailableError(RuntimeError):
     """Playwright or its Chromium is not installed (CLI exit 3)."""
 
 
-#: Advice when the Playwright package is missing (uv, pipx or pip, as in the README's Install section;
-#: the package is installed from GitHub, it is not on PyPI yet).
+#: Advice when the Playwright package is missing (uv, pipx or pip, as in the README's Install section).
 INSTALL_HINT = (
     "install the browser extra and Playwright's Chromium the way scrapescope was installed: "
-    "uv tool install 'scrapescope[browser] @ git+https://github.com/ipvolt/scrapescope'"
-    " --with-executables-from playwright, "
+    "uv tool install 'scrapescope[browser]' --with-executables-from playwright, "
     "or pipx inject --include-apps scrapescope playwright, "
-    "or pip install 'scrapescope[browser] @ git+https://github.com/ipvolt/scrapescope'; "
+    "or pip install 'scrapescope[browser]'; "
     "then playwright install chromium"
 )
 #: Advice when Playwright is present but its Chromium cannot start.
