@@ -555,13 +555,15 @@ the received and the decoded bytes. The budget bounds bytes, not connections.
   forwarder parses untrusted HTTP/1.1 from clients and origins with it. The
   optional `[browser]` extra adds Playwright, whose `playwright install
   chromium` downloads a Chromium build from Playwright's servers.
-- **Releases.** scrapescope is installed from its GitHub repository
-  (`git+https://github.com/ipvolt/scrapescope`); pin a tag or commit with
-  `@<ref>` when you need a fixed revision. PyPI publication is planned, not
-  yet in place: packages are to be published from CI with PyPI Trusted
-  Publishing and attestations, from a protected default branch to which only
-  the ipvolt team merges. Until the first PyPI release exists, none of that
-  applies. Before any public build, `scripts/release_check.py` must pass: no
+- **Releases.** scrapescope is published on PyPI as `scrapescope`. Each
+  release is built and uploaded by `.github/workflows/release.yml` when the
+  ipvolt team publishes a GitHub release: the workflow builds the sdist and
+  wheel from the tagged commit, checks that the tag matches the package
+  version, and uploads with PyPI Trusted Publishing (a short-lived OIDC token
+  from the `pypi` environment; no API token is stored anywhere), which also
+  publishes attestations. You can still install from the GitHub repository
+  (`git+https://github.com/ipvolt/scrapescope`) and pin a tag or commit with
+  `@<ref>`. Before any public build, `scripts/release_check.py` must pass: no
   placeholders, no relative README links, and project and contact URLs that
   exist ([release checklist](dev/release-checklist.md)).
 - **Catalogs.** The JSON catalogs are data, reviewed by the maintainer. They can

@@ -310,9 +310,8 @@ still_name_their_hosts` fetches every direct.json `docs` URL and every
 background.json `host_evidence` URL and checks that each page names its host.
 `release_check.py` reads every file the wheel and sdist ship. It fails while
 any placeholder remains (the maintainer-name placeholder, for example), while
-the README has relative links (they break in a PyPI long description; the
-package is installed from GitHub for now, where relative links work, so this
-item stays open until the planned PyPI publication), and while
+the README has relative links (they break in a PyPI long description, so
+the README links to files in the repository with absolute URLs), and while
 `pyproject.toml` has no project URLs or the User-Agent has no contact URL.
 Text that describes a placeholder names it in words, as this paragraph does,
 so that the check does not flag its own documentation.
