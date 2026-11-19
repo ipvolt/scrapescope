@@ -1,4 +1,4 @@
-# Contributing to scrapescope
+# Contributing to Scrapescope
 
 Thank you for helping. This guide covers what the project accepts, how to set
 up and test, and how to contribute catalog entries with evidence.
@@ -18,7 +18,7 @@ Security problems go to [SECURITY.md](SECURITY.md), not to public issues.
 
 ## What fits, and what does not
 
-scrapescope measures and explains where a job's proxy bytes go. It stays
+Scrapescope measures and explains where a job's proxy bytes go. It stays
 neutral between providers and stays local.
 
 Welcome: measurement accuracy, new client coverage, clearer reports, fixes for
@@ -42,7 +42,7 @@ Not accepted, whatever the implementation quality:
 
 ## Development setup
 
-scrapescope needs Python 3.11 or newer. The test suite has run on macOS with
+Scrapescope needs Python 3.11 or newer. The test suite has run on macOS with
 Python 3.12; Linux is expected to work but not yet tested, and Windows is
 untested in v1. `.github/workflows/ci.yml` runs the suite on Linux and macOS
 with Python 3.11 to 3.14 on every push and pull request.
@@ -124,7 +124,7 @@ package; one that imports Playwright itself should use
 
 ## Catalog entries
 
-scrapescope ships three versioned JSON catalogs in `src/scrapescope/catalog/`.
+Scrapescope ships three versioned JSON catalogs in `src/scrapescope/catalog/`.
 They are the part of the project where outside knowledge helps most, and the
 part where a wrong entry misleads users most, so every entry needs public
 evidence and the maintainer reviews each one.
@@ -297,7 +297,7 @@ rules as the tool: no claims that are not measured or sourced, no "first",
 no "save X%" claims (what-if figures say "would remove about X (Y% of this
 run, modelled)"), and figures labelled as described in
 [docs/accuracy.md](docs/accuracy.md). When you describe another project, say
-what it does before what scrapescope adds, and cite its own documentation with
+what it does before what Scrapescope adds, and cite its own documentation with
 the date you read it.
 
 ## Before a release

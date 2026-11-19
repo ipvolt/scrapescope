@@ -1,6 +1,6 @@
-# Privacy: what scrapescope stores
+# Privacy: what Scrapescope stores
 
-scrapescope runs on your machine and sends nothing to ipvolt or anyone else. It
+Scrapescope runs on your machine and sends nothing to ipvolt or anyone else. It
 has no telemetry, analytics, crash reporting or update checks. This page lists
 every place it writes data, what each one contains, and what it never keeps.
 
@@ -17,9 +17,9 @@ every place it writes data, what each one contains, and what it never keeps.
 | report.html | only with `--html PATH` (or `scrapescope report ... --html PATH`) | that path | until you delete it |
 | events file | during `run` | `events.jsonl` in a new private temporary directory | deleted after the run, unless `--keep-events` |
 | serve token file | `serve` with `--token-file PATH`, or when its stderr is not a terminal | that path, or `proxy-url` in a new private (0700) temporary directory; mode 0600 | deleted when `serve` stops |
-| terminal output | always, unless `--quiet` | stderr (`run`, `serve`), stdout (`find` result) | not stored by scrapescope; your terminal or CI may keep it |
+| terminal output | always, unless `--quiet` | stderr (`run`, `serve`), stdout (`find` result) | not stored by Scrapescope; your terminal or CI may keep it |
 
-scrapescope writes no log files, caches, history or configuration files.
+Scrapescope writes no log files, caches, history or configuration files.
 Reports are written atomically (a temporary file, then a rename) and are
 created with mode 0600, readable only by you, because they name the hosts your
 job contacted. Use `chmod` if you want to share one on the same machine.
@@ -41,7 +41,7 @@ which rejects any field it does not list. By group:
 - **Units and pages**: the unit count and its source, browser launches, bytes
   before the first navigation, bytes of the first unit and the mean of the
   rest, the status histogram and the success count and rate.
-- **Hosts**: for each host your job contacted through scrapescope, its name,
+- **Hosts**: for each host your job contacted through Scrapescope, its name,
   ports, tunnel counts, bytes, request count, buckets, bytes allocated per
   resource type and, when it is catalogued, the background catalog id. With
   `--keep-urls` only, its top URL paths with request counts and sizes; never
@@ -51,7 +51,7 @@ which rejects any field it does not list. By group:
   direct.json that your job used, with bytes. This shows which of those
   services your job called.
 - **Bypass**: hostnames the helpers or hooks saw that did not pass through
-  scrapescope, and a count.
+  Scrapescope, and a count.
 - **find**: the target host (and path with `--keep-urls`); the result status;
   the number of values searched (not the values); challenge vendor and signal
   names; for each match its host, port, scheme, resource type, MIME type,
@@ -72,13 +72,13 @@ which rejects any field it does not list. By group:
 
 ## What is never stored
 
-In report.json, report.html and the events file, scrapescope never stores:
+In report.json, report.html and the events file, Scrapescope never stores:
 
 - request or response bodies;
 - cookies, or the value of any header (only whether a `Cookie` or
   `Authorization` header was sent, and header sizes);
 - credentials: the upstream URL, provider usernames and passwords, the
-  scrapescope token, or any `Proxy-Authorization` value;
+  Scrapescope token, or any `Proxy-Authorization` value;
 - your provider's host or port;
 - the command line or arguments of your job, or environment variable values;
 - the values you search for with `find`. A match's path, and a JSON-key
@@ -114,7 +114,7 @@ was sent, plus a timestamp and the opaque context id. A path is included only
 with `--keep-urls`. `data:`, `blob:`, `about:`, `chrome:` and extension URLs
 are never written.
 
-scrapescope reads the file after your job exits and deletes the directory,
+Scrapescope reads the file after your job exits and deletes the directory,
 unless you pass `--keep-events`, in which case it prints the path and leaves the
 file for you.
 
@@ -168,12 +168,12 @@ traffic, which can be enough to recognise a well-known site.
 
 ## Network connections
 
-scrapescope connects only on behalf of your job, for the page `find` loads
+Scrapescope connects only on behalf of your job, for the page `find` loads
 (and what that page loads), and for the single `--verify` request. With a
 provider configured, target hostnames go to the provider unresolved. The one
-exception is direct.json hosts (LLM APIs) under `run --env-all`: scrapescope
+exception is direct.json hosts (LLM APIs) under `run --env-all`: Scrapescope
 resolves them and connects from your own IP address, which those services
 then see; `run` says so at start and the report warns. In sizing mode
-scrapescope resolves names with your system resolver and refuses loopback,
+Scrapescope resolves names with your system resolver and refuses loopback,
 private and link-local destinations unless you pass `--allow-private-targets`.
 It never contacts ipvolt.

@@ -1,6 +1,6 @@
-# Method: how scrapescope measures
+# Method: how Scrapescope measures
 
-This document explains what scrapescope counts, where it counts it, how it
+This document explains what Scrapescope counts, where it counts it, how it
 assigns bytes to hosts, resource types and buckets, how the budget works and
 how `find` searches and ranks responses. [accuracy.md](accuracy.md) covers what
 the resulting figures mean and how they can differ from a provider's bill.
@@ -29,7 +29,7 @@ The forwarder is a loopback proxy written with Python's asyncio and `h11`. It
 accepts two kinds of request from your job:
 
 - `CONNECT host:port`, which opens a tunnel. Everything after that (usually
-  TLS) is relayed as opaque bytes. scrapescope never terminates or inspects
+  TLS) is relayed as opaque bytes. Scrapescope never terminates or inspects
   TLS.
 - Absolute-form `http://` requests (`GET http://host/path HTTP/1.1`), which are
   relayed with HTTP/1.1 framing and keep-alive on both sides (section 3).
@@ -41,7 +41,7 @@ Everything else is refused before any contact with the provider; see
 
 A **tunnel** (a tunnel record in the report) is one client connection's
 traffic to one authority (`host:port`) over one upstream connection.
-scrapescope never pools or shares upstream connections, and it never changes
+Scrapescope never pools or shares upstream connections, and it never changes
 hostnames or usernames. It opens no connections of its own: every upstream
 connection belongs to one client connection. The extra hop does add a little
 latency, and a browser schedules its HTTP/1.1 connections by timing, so a
@@ -52,7 +52,7 @@ the meter; with a 20 ms delay in front of the test provider (a stand-in for a
 real provider's round trip) the counts were identical in every run.
 
 If a keep-alive plain-HTTP client connection switches to a different host,
-scrapescope starts a new tunnel record at the request boundary, so per-host
+Scrapescope starts a new tunnel record at the request boundary, so per-host
 counts stay exact. Through an HTTP CONNECT provider the upstream connection is
 to the provider, and clients such as Requests, urllib3 and Chromium keep one
 proxy connection for plain `http://` requests to any host; so the connection
@@ -80,7 +80,7 @@ Each tunnel records:
 | auth | whether credentials were injected, passed through, mapped from the token username, or absent |
 
 Failure reasons include `upstream_status` (the provider answered CONNECT with a
-non-2xx status, which scrapescope relays to your client unchanged; and, on the
+non-2xx status, which Scrapescope relays to your client unchanged; and, on the
 HTTP CONNECT route, a plain-HTTP record whose final responses were all 407,
 which is the provider's answer: it is relayed verbatim and the record ends
 `failed:upstream_status` with status 407, while a 407 followed by another
@@ -110,20 +110,20 @@ or more, failed: `every tunnel failed (<reason> xN): <hint naming $VAR>`.
 
 ## 3. Counting at the upstream socket
 
-Every byte scrapescope writes to the upstream socket is added to "bytes sent"
+Every byte Scrapescope writes to the upstream socket is added to "bytes sent"
 when it is handed to the socket's transport. Every byte it reads is added to
 "bytes received" as soon as it is read, before it is relayed to your client.
-When scrapescope aborts a connection (budget, tunnel cap, stop or idle
+When Scrapescope aborts a connection (budget, tunnel cap, stop or idle
 timeout), whatever was still queued in the transport never reaches the kernel
 and is uncounted again, so "bytes sent" means bytes handed to the kernel.
 These counts are exact for that socket: they are the application-layer bytes
 of the connection to your provider, including TLS records, HTTP/2 frames and
 WebSocket frames inside the tunnel. They exclude TCP/IP headers and
 retransmissions, which the operating system handles. Bytes between your client
-and scrapescope are recorded only for diagnostics and never enter totals.
+and Scrapescope are recorded only for diagnostics and never enter totals.
 
 **Negotiation.** For an HTTP CONNECT provider, the negotiation bytes are the
-CONNECT request head scrapescope sent and the reply head it read, plus the body
+CONNECT request head Scrapescope sent and the reply head it read, plus the body
 of a relayed non-2xx reply. For a SOCKS5 provider, they are the greeting, the
 method choice, the RFC 1929 username/password exchange and the CONNECT request
 and reply. Bytes read after a 2xx reply head, even in the same read, are
@@ -138,10 +138,10 @@ Which of the two a given provider bills is not known in general; see
 [accuracy.md](accuracy.md).
 
 **Direct (sizing) mode** has no negotiation. Its "with CONNECT" figure adds, for
-each CONNECT tunnel, an estimate of the CONNECT exchange scrapescope would have
+each CONNECT tunnel, an estimate of the CONNECT exchange Scrapescope would have
 had with a provider:
 
-- the request: the CONNECT head your client actually sent, as scrapescope
+- the request: the CONNECT head your client actually sent, as Scrapescope
   would forward it to an HTTP CONNECT provider, without any
   `Proxy-Authorization` line. Chromium's is about 236 bytes (`Host`,
   `Proxy-Connection: keep-alive` and its `User-Agent`); a minimal head
@@ -149,7 +149,7 @@ had with a provider:
   `origin-a.test:443`. A client that sends less is estimated at what it sent:
   Python 3.11's `http.client` (and so `requests`) sends
   `CONNECT host:port HTTP/1.0` and a blank line without `Host`, 38 bytes for
-  the same authority, which scrapescope forwards unchanged (3.12 adds `Host`);
+  the same authority, which Scrapescope forwards unchanged (3.12 adds `Host`);
 - the reply `HTTP/1.1 200 Connection established` with a blank line (39
   bytes).
 
@@ -177,7 +177,7 @@ request; the "estimated" mark reflects CONNECT tunnels only
 - chunked trailers are relayed in both directions, except to HTTP/1.0 clients,
   which get a close-delimited body;
 - when a final response arrives while the client is still waiting for
-  `100 Continue`, or either side closes after the response, scrapescope relays
+  `100 Continue`, or either side closes after the response, Scrapescope relays
   the response and then closes the client connection (with a lingering close)
   instead of waiting for the request body;
 - interim `1xx` responses other than `101` are not relayed to HTTP/1.0 clients
@@ -187,8 +187,8 @@ request; the "estimated" mark reflects CONNECT tunnels only
   response with `Transfer-Encoding: <codings>, chunked` (such as `gzip,
   chunked`) reaches HTTP/1.1 clients with that header value and its
   chunk-framed body, although the chunk sizes may differ, as for any
-  plain-HTTP body scrapescope relays. HTTP/1.0 clients get `502
-  upstream-protocol-error` for such a response, since scrapescope does not
+  plain-HTTP body Scrapescope relays. HTTP/1.0 clients get `502
+  upstream-protocol-error` for such a response, since Scrapescope does not
   decode transfer codings, and other malformed response heads still get
   `502 upstream-protocol-error`.
 
@@ -201,7 +201,7 @@ rewritten bytes actually sent. CONNECT request heads are forwarded unchanged
 (apart from `Proxy-Authorization`, section 4).
 
 If a reused keep-alive upstream connection closes or resets after a request
-was forwarded but before any byte of its reply, scrapescope closes (or resets)
+was forwarded but before any byte of its reply, Scrapescope closes (or resets)
 your client's connection without a reply, so that your client's own retry of
 an idempotent request applies, as it would with a direct connection; that
 tunnel is `ok`. A first request on a fresh upstream connection still gets
@@ -255,10 +255,10 @@ For each request, in order:
    carrying them direct would expose your IP address to the bucket owner.
 3. **Provider configured**: the request goes to the provider, with the target
    hostname passed on unresolved (HTTP CONNECT authority, or SOCKS5 address
-   type "domain name", which means the provider resolves it). scrapescope
+   type "domain name", which means the provider resolves it). Scrapescope
    never resolves target names locally on these routes; the only local lookup
    is of the provider's own hostname.
-4. **Otherwise** (sizing mode): scrapescope connects directly. It resolves the
+4. **Otherwise** (sizing mode): Scrapescope connects directly. It resolves the
    name once, refuses destinations that are not globally routable (loopback,
    RFC 1918 private, link-local including `169.254.169.254`, CGNAT
    `100.64.0.0/10`, unique-local IPv6, unspecified, reserved and multicast;
@@ -285,7 +285,7 @@ CONNECT provider receives keeps your client's spelling (the CONNECT line, and
 the plain-HTTP target and `Host`); over SOCKS5 a legacy IPv4 spelling is sent
 as the canonical address (address type IPv4) instead of as a name.
 
-On the two routes where scrapescope connects by itself (direct and
+On the two routes where Scrapescope connects by itself (direct and
 non-target), a name with several addresses is tried Happy-Eyeballs style (RFC
 8305): address families interleaved, a new attempt every 250 ms or as soon as
 one fails, within one overall connect deadline. A blackholed first address
@@ -294,11 +294,11 @@ whole timeout.
 
 **Deadlines.** The 30-second connect timeout bounds only name resolution and
 the TCP connect (to the provider, or to the target on the direct routes).
-Once connected, scrapescope waits up to the idle timeout (600 seconds) for the
+Once connected, Scrapescope waits up to the idle timeout (600 seconds) for the
 provider's HTTP CONNECT reply head or its SOCKS5 negotiation replies, because
 a provider may hold a CONNECT while it finds an exit or retries the target;
 no reply in that time gives your client `504 upstream-timeout`. The body of a
-non-2xx CONNECT reply is still read within 30 seconds. While scrapescope
+non-2xx CONNECT reply is still read within 30 seconds. While Scrapescope
 waits, a client that resets its connection, or closes it without having sent
 anything, ends the wait at once: the provider connection is closed and the
 tunnel is `failed:client_closed`. Bytes a client sends before the 200 (a TLS
@@ -337,7 +337,7 @@ provider has already carried those bytes. A unit is required: `2GB`
 bare number is a usage error (exit 2). Units mean what they say, independent
 of `--gib`.
 
-- At 80% scrapescope prints one warning, unless the same read also trips the
+- At 80% Scrapescope prints one warning, unless the same read also trips the
   budget; the report's budget events still list both.
 - At 100% it records a budget event naming the (up to ten) heaviest hosts by
   upstream bytes in the final 60 seconds, closes every open tunnel (status
@@ -352,7 +352,7 @@ of `--gib`.
 The meter stops at its own count. Bytes already in flight at your provider
 when the budget trips can add roughly a few MB per open tunnel to what the
 provider counts. In the local budget test, the test provider had handed over
-about 80 KB more than scrapescope read before it closed the tunnel. Because an
+about 80 KB more than Scrapescope read before it closed the tunnel. Because an
 abort uncounts sent bytes that were still queued (section 3), the final
 counted total can end slightly below the figure in the trip event, which is
 the count the meter decided on; the trip stays in force.
@@ -560,7 +560,7 @@ the with-CONNECT total.
    A `403` to a request that started after the budget tripped is the meter's
    own refusal, which records no tunnel, and is not bypass. `data:` and `blob:`
    URLs are never recorded. The detector cannot see clients without helpers or
-   hooks that skip scrapescope; the report says so. With
+   hooks that skip Scrapescope; the report says so. With
    `--fail-on bypass`, an incomplete run exits with 87, and the banner reads
    "helpers or hooks reported traffic that the meter did not carry".
 10. **Multi-page contexts**: when one browser context loaded two or more pages,
@@ -581,7 +581,7 @@ the with-CONNECT total.
    (`ERR_UNSAFE_PORT`, `ERR_NAME_NOT_RESOLVED`, `ERR_INVALID_URL`, URL-scheme
    errors, `ERR_BLOCKED_BY_*`, SSL cipher mismatch, client-certificate errors,
    too many or invalid redirects, and every `ERR_CERT_*`); a timeout is not
-   retried either. scrapescope ends the load early, with the reason, when the
+   retried either. Scrapescope ends the load early, with the reason, when the
    provider answers 407, rejects SOCKS5 credentials or cannot be reached
    (Chromium itself would wait for credentials until the timeout), when the
    budget trips, and, for an `https://` target, when the meter refused the
@@ -714,7 +714,7 @@ the with-CONNECT total.
    in report.json) reads `not found: value N; only responses of the initial
    page load were inspected; content loaded later by scrolling, clicking or
    timers is not covered`. A value that is not found may still be computed by
-   scripts; scrapescope never claims that the page computed it.
+   scripts; Scrapescope never claims that the page computed it.
 6. **Flags.** Each match shows whether the request actually sent cookies or an
    `Authorization` header (presence, not whether they were needed), whether it
    carries a random-looking token, whether the host is third-party (the last
@@ -768,7 +768,7 @@ the with-CONNECT total.
    `httpx[brotli,zstd]` and a warning says that clients without those decoders
    receive a larger body. Starter code appears only in the terminal, never in
    the report file.
-8. **Verify.** With `--verify`, scrapescope sends exactly one GET through the
+8. **Verify.** With `--verify`, Scrapescope sends exactly one GET through the
    same forwarder and provider, with no cookies, no captured headers or
    tokens, redirects not followed, the user agent
    `scrapescope/<version> (+https://github.com/ipvolt/scrapescope)` and
@@ -937,13 +937,13 @@ label is "estimated billable transfer".
   allows only its own inline style by hash.
 - **Reports read from a file** (`scrapescope report`): fixes are never shown as
   stored, in any format (`--format json` included). Their title, detection,
-  code and caveats are rebuilt by this scrapescope from the fix id and the
+  code and caveats are rebuilt by this Scrapescope from the fix id and the
   file's own figures; the stored detection text is never shown, and missing
   figures give a pointer such as "see the report's buckets". The text and
   HTML renderers say so: "titles, detections, code and caveats are rebuilt by
   this scrapescope from each fix id and the file's own figures. Code and text
   stored in fixes are never shown." The schema allows only the six fix
-  ids scrapescope generates, so a file with another id fails validation (exit
+  ids Scrapescope generates, so a file with another id fails validation (exit
   2).
 - **Diagnostics** in every report: requests refused before a tunnel, by
   reason; failed tunnels by failure reason (`tunnel_failures`, for example
@@ -984,7 +984,7 @@ check, not a unit-test matter), `unverified` (no test yet).
 |---|---|---|---|---|
 | F1 | Binds 127.0.0.1 only, on a random port by default | README, security.md | `tests/test_forwarder_thread.py::test_fixed_port_and_loopback_only_binding` | verified |
 | F2 | Accepts only `CONNECT` and absolute-form `http://`; absolute-form `https://` gets 400 `X-Scrapescope-Error: https-absolute-form` | method.md §1, security.md | `tests/test_forwarder_errors.py::test_absolute_https_gets_400` | verified |
-| F3 | Origin-form and other request forms get a bare 403 (`Content-Length: 0`, no body, no scrapescope headers) before any upstream contact | security.md | `tests/test_forwarder_errors.py::test_origin_form_gets_bare_403`; `tests/test_e2e_serve.py::test_serve_sigterm_and_origin_form_403` | verified |
+| F3 | Origin-form and other request forms get a bare 403 (`Content-Length: 0`, no body, no Scrapescope headers) before any upstream contact | security.md | `tests/test_forwarder_errors.py::test_origin_form_gets_bare_403`; `tests/test_e2e_serve.py::test_serve_sigterm_and_origin_form_403` | verified |
 | F4 | A target that is the meter's own listener is refused with 403 `self-loop`, including legacy loopback spellings and `::ffff:127.0.0.1`; a name or provider name that resolves to the meter is refused at connect time (`failed:self_loop`); an upstream URL pointing at the meter is refused at start | security.md, method.md §4 | `tests/test_forwarder_errors.py::test_self_loop_refused`; `tests/test_forwarder_errors.py::test_ip_literal_parses_like_getaddrinfo`; `tests/test_forwarder_errors.py::test_upstream_url_with_legacy_loopback_spelling_is_refused_at_start`; `tests/test_forwarder_errors.py::test_upstream_name_resolving_to_the_meter_does_not_recurse`; `tests/test_forwarder_thread.py::test_upstream_pointing_at_the_meter_itself_is_refused` | changed |
 | F5 | Never terminates TLS; CONNECT payload is relayed as opaque bytes (clients verify the origin's certificate through the tunnel) | README, method.md | `tests/test_forwarder_counts.py::test_counts_equal_fixture_upstream`; `tests/test_e2e_run.py::test_run_through_http_upstream_matches_fixture_counts` | verified |
 | F6 | With a provider configured, target names are never resolved locally on http-connect or socks5 routes (SOCKS5 uses address type "domain name"); the one exception is direct.json hosts under `run --env-all`, which the meter resolves and connects to from this machine's own IP, announced at start and in the report | method.md §4, security.md | `tests/test_forwarder_errors.py::test_upstream_route_never_resolves_target_names`; `tests/test_forwarder_errors.py::test_env_all_direct_rules_resolve_locally_as_documented`; `tests/test_forwarder_upstream_replies.py::test_socks_address_types`; `tests/test_e2e_run.py::test_env_all_carries_llm_hosts_direct_as_non_target`; `tests/test_e2e_run.py::test_env_all_without_upstream_prints_no_exposure_note` | changed |
@@ -1039,7 +1039,7 @@ check, not a unit-test matter), `unverified` (no test yet).
 | M8 | Budget trip with 50 concurrent tunnels | method.md §5 | `tests/test_forwarder_budget.py::test_budget_trip_closes_50_concurrent_tunnels` | verified |
 | M9 | `--max-tunnel-mb N` closes only that upstream connection at N × 10^6 bytes, regardless of `--gib`; on the HTTP CONNECT route a kept provider connection's count includes every continued record, and the `tunnel_cap` event names the record that reached the cap with the connection's count | README, method.md §5, contracts §3.7 | `tests/test_forwarder_budget.py::test_max_tunnel_bytes_closes_only_that_tunnel`; `tests/test_forwarder_budget.py::test_max_tunnel_bytes_follows_a_kept_provider_connection_across_authorities`; `tests/test_cli.py::test_max_tunnel_mb_is_decimal_megabytes_regardless_of_gib` | changed |
 | M10 | Sizes like `2GB`/`1.5GiB` parse as decimal/binary regardless of `--gib`; `--budget` requires a unit (a bare number exits 2) | method.md §5, README | `tests/test_config.py::test_parse_size`; `tests/test_config.py::test_parse_size_rejects`; `tests/test_cli.py::test_budget_accepts_sizes_with_units`; `tests/test_cli.py::test_budget_without_a_unit_is_a_usage_error` | changed |
-| M11 | The meter stops at its own count: after a trip the provider may have handed over more than scrapescope counted (bounded by socket buffers) | README, method.md §5, accuracy.md | `tests/test_e2e_run.py::test_budget_trip_stops_the_whole_process_group` | verified |
+| M11 | The meter stops at its own count: after a trip the provider may have handed over more than Scrapescope counted (bounded by socket buffers) | README, method.md §5, accuracy.md | `tests/test_e2e_run.py::test_budget_trip_stops_the_whole_process_group` | verified |
 | M12 | Sent bytes count when handed to the transport; an abort uncounts what was still queued, so the final count can end below the trip event's, and the trip stays in force | method.md §3, §5 | `tests/test_forwarder_meter.py::test_discard_sent_uncounts_tunnel_budget_and_timeline`; `tests/test_forwarder_meter.py::test_discard_sent_keeps_a_trip_in_force`; `tests/test_forwarder_budget.py::test_sent_bytes_at_an_upload_trip_equal_what_left_the_meter` | verified |
 | M13 | `totals.tunnels` counts records and `totals.connections` the upstream connections opened for them; the report shows a `connections` row only when they differ | method.md §3, contracts §11.1 | `tests/test_attribution.py::test_a_record_that_continues_a_kept_connection_gets_no_setup_allowance` (`Totals.connections`); `tests/test_report.py::test_totals_show_connections_only_when_fewer_than_tunnel_records` | verified |
 
@@ -1081,7 +1081,7 @@ check, not a unit-test matter), `unverified` (no test yet).
 | D4 | Short or digits-only values warn (coincidental beacon match), currency symbols and codes included; the warning names the value, and is left out when nothing was searched or the top match also holds a non-short value | README, method.md §8 | `tests/test_find_search.py::test_short_value_rule`; `tests/test_find_search.py::test_currency_values_count_as_numeric_only`; `tests/test_find_search.py::test_short_value_warning_names_the_value_and_is_left_out_when_it_cannot_mislead`; `tests/test_find_browser.py::test_coincidental_beacon_match_is_flagged`; live: no warning for `51.77` next to "A Light in the Attic" in the same top match (2026-09-23) | changed |
 | D5 | Coverage line on every result; skipped reasons counted, a challenged sub-response as `challenge page` with a warning naming the vendor; values in no response are named under the coverage line with the initial-load note | README, method.md §8 | `tests/test_find_browser.py::test_coverage_counts_every_response`; `tests/test_find_browser.py::test_value_nowhere_reports_not_found_with_coverage`; `tests/test_types.py::test_coverage_summary`; `tests/test_find_regressions.py::test_challenged_xhr_is_not_counted_as_inspected`; `tests/test_find_search.py::test_sub_response_classification_scope`; `tests/test_find_search.py::test_render_names_missing_values_under_the_coverage_line` | changed |
 | D6 | Starter code only for 2xx GETs without cookies, Authorization, a token-like request header ("sent a token header", flag `token-header`) or random-looking tokens (query values, session- or signature-like parameter names, tokens inside compound values, `;name=value` path parameters, and path segments on the same heuristic as report path cleaning); otherwise a not-emitted line that names session or anti-bot state only for those reasons (a non-GET, a status and a service worker's answer each say what they are); the curl command gets `--globoff` for URLs with `[ ] { }` | README, method.md §8 | `tests/test_find_search.py::test_code_eligibility_reasons`; `tests/test_find_search.py::test_looks_random_uuids_and_lowercase_ids`; `tests/test_find_search.py::test_random_path_token_detection`; `tests/test_find_regressions.py::test_uuid_request_id_withholds_code_and_verify`; `tests/test_find_browser.py::test_session_product_flagged_sent_cookies_and_not_code_eligible`; `tests/test_find_browser.py::test_signed_offer_flagged_random_token`; `tests/test_find_search.py::test_signed_and_session_query_values_withhold_code`; `tests/test_find_search.py::test_session_path_parameters_withhold_code`; `tests/test_find_search.py::test_find_and_reports_share_one_path_token_heuristic`; `tests/test_find_round3.py::test_token_header_withholds_code_with_its_own_reason`; `tests/test_find_regressions.py::test_api_key_header_withholds_code_and_verify_says_no`; `tests/test_find_round3.py::test_persisted_query_hashes_and_jsonp_callbacks_are_not_tokens`; `tests/test_find_round3.py::test_curl_starter_turns_globbing_off_for_brackets_and_braces`; `tests/test_find_round3.py::test_curl_starter_command_sends_exactly_one_request`; `tests/test_find_round4_find.py::test_not_emitted_text_matches_the_reason`; `tests/test_find_round4_find.py::test_a_cookieless_post_and_a_404_are_not_called_session_state` | changed |
-| D7 | `--verify` sends exactly one cookie-less GET with the scrapescope user agent and `Accept-Encoding: gzip, deflate`, no redirects, through the same forwarder/upstream, to the top eligible match or to a higher-ranked replay candidate (ineligible only for cookies or a token header) when no eligible match with the same values is within 2x its size; it decodes the body with a bounded decoder (the cap holds for received and decoded bytes; stacked or unrequested codings are `not tested`); "yes" needs every value as itself; client errors, a replay not sent after a budget trip or upstream failure, the meter's own reply, a proxy 407, a 502/504 and a replay past its one deadline are `not tested`, never a crash; coding text in reasons is reduced to tokens | README, method.md §8 | `tests/test_find_browser.py::test_verify_replays_product_json_through_the_same_proxy`; `tests/test_e2e_browser.py::test_find_through_upstream_finds_verifies_and_keeps_the_value_private`; `tests/test_find_search.py::test_verify_replay_rejects_overlong_urls_as_not_tested`; `tests/test_find_search.py::test_verify_top_turns_unexpected_errors_into_not_tested`; `tests/test_find_search.py::test_bounded_decoder_stops_at_the_cap_and_refuses_stacked_codings`; `tests/test_find_search.py::test_verify_survives_a_compression_bomb`; `tests/test_find_search.py::test_verify_needs_a_non_weak_match_in_the_replay`; `tests/test_find_round3.py::test_verify_target_prefers_a_much_smaller_candidate_over_the_page`; `tests/test_find_round3.py::test_a_cookie_only_match_is_replayed_and_gets_code_when_it_replays`; `tests/test_find_regressions.py::test_analytics_cookie_does_not_keep_the_json_from_verify`; `tests/test_find_round3.py::test_no_replay_after_the_budget_tripped`; `tests/test_find_regressions.py::test_no_replay_once_the_budget_tripped`; `tests/test_find_round3.py::test_replay_answered_by_the_meter_or_a_proxy_is_not_tested`; `tests/test_find_round3.py::test_replay_has_one_overall_deadline`; `tests/test_find_round3.py::test_replay_reason_never_carries_the_sites_content_encoding`; `tests/test_find_round3.py::test_replay_warning_shows_coding_tokens_only` | changed |
+| D7 | `--verify` sends exactly one cookie-less GET with the Scrapescope user agent and `Accept-Encoding: gzip, deflate`, no redirects, through the same forwarder/upstream, to the top eligible match or to a higher-ranked replay candidate (ineligible only for cookies or a token header) when no eligible match with the same values is within 2x its size; it decodes the body with a bounded decoder (the cap holds for received and decoded bytes; stacked or unrequested codings are `not tested`); "yes" needs every value as itself; client errors, a replay not sent after a budget trip or upstream failure, the meter's own reply, a proxy 407, a 502/504 and a replay past its one deadline are `not tested`, never a crash; coding text in reasons is reduced to tokens | README, method.md §8 | `tests/test_find_browser.py::test_verify_replays_product_json_through_the_same_proxy`; `tests/test_e2e_browser.py::test_find_through_upstream_finds_verifies_and_keeps_the_value_private`; `tests/test_find_search.py::test_verify_replay_rejects_overlong_urls_as_not_tested`; `tests/test_find_search.py::test_verify_top_turns_unexpected_errors_into_not_tested`; `tests/test_find_search.py::test_bounded_decoder_stops_at_the_cap_and_refuses_stacked_codings`; `tests/test_find_search.py::test_verify_survives_a_compression_bomb`; `tests/test_find_search.py::test_verify_needs_a_non_weak_match_in_the_replay`; `tests/test_find_round3.py::test_verify_target_prefers_a_much_smaller_candidate_over_the_page`; `tests/test_find_round3.py::test_a_cookie_only_match_is_replayed_and_gets_code_when_it_replays`; `tests/test_find_regressions.py::test_analytics_cookie_does_not_keep_the_json_from_verify`; `tests/test_find_round3.py::test_no_replay_after_the_budget_tripped`; `tests/test_find_regressions.py::test_no_replay_once_the_budget_tripped`; `tests/test_find_round3.py::test_replay_answered_by_the_meter_or_a_proxy_is_not_tested`; `tests/test_find_round3.py::test_replay_has_one_overall_deadline`; `tests/test_find_round3.py::test_replay_reason_never_carries_the_sites_content_encoding`; `tests/test_find_round3.py::test_replay_warning_shows_coding_tokens_only` | changed |
 | D8 | Find values never appear in report.json or report.html; paths and JSON-key locations holding any searched form are dropped | privacy.md | `tests/test_find_browser.py::test_value_in_the_url_path_is_kept_out_of_the_report`; `tests/test_report.py::test_reports_never_contain_credentials_queries_cookies_or_find_values`; `tests/test_e2e_browser.py::test_find_through_upstream_finds_verifies_and_keeps_the_value_private`; `tests/test_find_search.py::test_no_searched_form_reaches_locations_or_paths_d8`; `tests/test_find_search.py::test_safe_path_drops_number_format_and_multiply_encoded_forms`; `tests/test_find_search.py::test_json_key_paths_drop_number_format_and_digit_run_forms` | changed |
 | D9 | Browser tests skip cleanly without Chromium; missing Playwright gives exit 3 before the meter starts, with uv, pipx and pip advice; a Chromium that fails to start gets its own message | exit-codes.md, README | `tests/conftest.py::_skip_browser_tests_without_chromium`; `tests/test_find_browser.py::test_missing_playwright_raises_browser_unavailable`; `tests/test_cli.py::test_find_without_a_browser_exits_3`; `tests/test_cli.py::test_find_checks_for_playwright_before_starting_the_meter`; `tests/test_cli.py::test_find_with_chromium_missing_gets_browser_advice_not_pip` | changed |
 | D10 | Default body cap 5 MB, adjustable with `--body-cap-mb` | method.md §8 | `tests/test_cli.py::test_find_passes_options_and_maps_outcomes`; `tests/test_find_browser.py::test_body_cap_skips_large_bodies` | verified |
@@ -1127,7 +1127,7 @@ check, not a unit-test matter), `unverified` (no test yet).
 | R12 | Without `--upstream-from-env`/`--direct`, `HTTPS_PROXY` is used if set, else exit 89 with a message suggesting `--direct`; the two flags together are a usage error (2) | README, exit-codes.md | `tests/test_config.py::test_resolve_upstream_missing_suggests_direct`; `tests/test_cli.py::test_usage_errors_exit_2`; `tests/test_cli.py::test_upstream_config_errors_exit_89_and_never_echo_the_value` | verified |
 | R13 | No network access except the job, find's page load and the one verify request; no telemetry or update checks | README, NOTICE, privacy.md | code review; the whole suite runs without internet access (the fixture world refuses unmapped names); the round-3 live runs (`find --verify` and a three-page `run`, books.toscrape.com, 2026-09-23) made no connections other than the page loads and the replay, which the meter's tunnel records list; not checked with a packet capture | partial |
 | R14 | `report` validates a file against the schema before rendering; unreadable or invalid files exit 2; fixes in a file are rebuilt from their id and the file's own figures (title, detection, code, caveats) in every format, `--format json` included, the stored detection text is never shown, and an unknown id fails validation; a file with a newer `schema_version` says "this report uses schema version N; this scrapescope reads version 1, so upgrade scrapescope to read it" | security.md, exit-codes.md | `tests/test_cli.py::test_report_rejects_unreadable_or_invalid_files`; `tests/test_report.py::test_load_report_errors_never_echo_content`; `tests/test_report.py::test_report_file_code_is_never_shown_and_fixes_are_rebuilt`; `tests/test_report.py::test_report_file_with_an_unknown_fix_id_is_rejected`; `tests/test_report.py::test_report_file_json_output_never_echoes_the_stored_fix_code`; `tests/test_report.py::test_report_file_detections_are_rebuilt_from_the_reports_figures`; `tests/test_snippets.py::test_regenerated_detections_come_from_the_report_not_the_stored_text` | changed |
-| R15 | scrapescope writes no log files, caches, history or configuration files; reports are written atomically (temporary file, then rename) | privacy.md | `tests/test_report.py::test_write_and_load_round_trip`; no files beyond the report are code review; round-4 manual check (2026-09-24): with `HOME` and `TMPDIR` pointed at empty temporary directories, `find --verify`, `run` and `report` left only the report file in the working directory and nothing in either directory | partial |
+| R15 | Scrapescope writes no log files, caches, history or configuration files; reports are written atomically (temporary file, then rename) | privacy.md | `tests/test_report.py::test_write_and_load_round_trip`; no files beyond the report are code review; round-4 manual check (2026-09-24): with `HOME` and `TMPDIR` pointed at empty temporary directories, `find --verify`, `run` and `report` left only the report file in the working directory and nothing in either directory | partial |
 | R16 | report.json and report.html are created with mode 0600 | privacy.md | `tests/test_e2e_run.py::test_run_through_http_upstream_matches_fixture_counts`; `tests/test_cli.py::test_report_text_json_and_html` | verified |
 | R17 | `--out`/`--html` locations are checked before the job starts (exit 2) | exit-codes.md | `tests/test_cli.py::test_report_paths_are_checked_before_the_job_runs` | verified |
 | R18 | Text in reports cannot carry Cc, Cf, Zl, Zp or Cs characters (bidi marks, separators, zero-width characters): `safe_text` escapes them and the schema rejects them | security.md | `tests/test_types.py::test_safe_text_escapes_every_control_format_and_separator_character`; `tests/test_report.py::test_schema_text_rejects_every_character_safe_text_escapes`; `tests/test_report.py::test_schema_code_allows_newlines_and_tabs_like_safe_code` | verified |

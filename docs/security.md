@@ -1,6 +1,6 @@
 # Security
 
-This is scrapescope's threat model: what it protects, what it trusts, how its
+This is Scrapescope's threat model: what it protects, what it trusts, how its
 listeners and tokens work, how it handles your provider credentials, and what
 it does to stay safe with untrusted input. To report a vulnerability, see
 [SECURITY.md](../SECURITY.md).
@@ -10,12 +10,12 @@ it does to stay safe with untrusted input. To report a vulnerability, see
 > [method.md](method.md#claims-to-verify). Treat a claim without a passing test
 > as unverified.
 
-## What scrapescope protects
+## What Scrapescope protects
 
 - **Your provider credentials**: the upstream proxy URL with its username and
-  password, and any credentials your job passes through scrapescope.
+  password, and any credentials your job passes through Scrapescope.
 - **Your provider balance**: bytes sent through your provider are billed to you.
-- **Your traffic**: scrapescope never decrypts it and stores only metadata.
+- **Your traffic**: Scrapescope never decrypts it and stores only metadata.
 - **Your reports**: they name the hosts your job contacted.
 
 It trusts your user account and the job you run under it. It treats as
@@ -25,12 +25,12 @@ headers and bodies), report files you receive from someone else, and the lines
 in its own events file (which the job writes).
 
 Out of scope: an attacker with root or administrator rights on your machine,
-and your provider itself, which sees your traffic whether or not scrapescope is
+and your provider itself, which sees your traffic whether or not Scrapescope is
 in the path.
 
 ## Listeners
 
-- scrapescope binds `127.0.0.1` only, never `0.0.0.0` or `::`. Other machines
+- Scrapescope binds `127.0.0.1` only, never `0.0.0.0` or `::`. Other machines
   cannot reach it. It does not listen on IPv6 loopback, so clients must use
   `http://127.0.0.1:<port>`, not `localhost` (which may resolve to `::1`).
 - The port is random unless you pass `--port`.
@@ -38,7 +38,7 @@ in the path.
   (`SCRAPESCOPE_AUTH_PROXY_URL`), which answers 407 to a request without
   credentials. Chromium sends proxy credentials only after a 407 challenge, so
   this listener is what lets per-context credentials (such as provider session
-  usernames) reach scrapescope and pass through. scrapescope's own 407 replies
+  usernames) reach Scrapescope and pass through. Scrapescope's own 407 replies
   carry `Connection: close`; Chromium retries on a new connection with the
   credentials, which tests confirm for both launch-level and per-context
   credentials.
@@ -50,10 +50,10 @@ in the path.
 |---|---|
 | `CONNECT host:port` | a tunnel, subject to the checks below |
 | absolute-form `http://...` (any method) | relayed with HTTP/1.1 framing |
-| absolute-form `https://...` | `400`, `X-Scrapescope-Error: https-absolute-form` (scrapescope never originates TLS) |
-| origin-form (`GET /path`), asterisk-form or anything else | `403` with `Content-Length: 0`, no body and no scrapescope headers |
+| absolute-form `https://...` | `400`, `X-Scrapescope-Error: https-absolute-form` (Scrapescope never originates TLS) |
+| origin-form (`GET /path`), asterisk-form or anything else | `403` with `Content-Length: 0`, no body and no Scrapescope headers |
 | malformed request or authority, or a plain-HTTP request with both `Content-Length` and `Transfer-Encoding` | `400`, `X-Scrapescope-Error: bad-request` |
-| a target that is scrapescope itself: `localhost` or a loopback literal on one of its ports, in any spelling `getaddrinfo` accepts (`127.1`, `0x7f.0.0.1`, `2130706433`, `::ffff:127.0.0.1` ...) | `403`, `X-Scrapescope-Error: self-loop` |
+| a target that is Scrapescope itself: `localhost` or a loopback literal on one of its ports, in any spelling `getaddrinfo` accepts (`127.1`, `0x7f.0.0.1`, `2130706433`, `::ffff:127.0.0.1` ...) | `403`, `X-Scrapescope-Error: self-loop` |
 | token required but missing, or an `ss-` username with the wrong token | `407`, `Proxy-Authenticate: Basic realm="scrapescope"` |
 | budget already tripped | `403`, `X-Scrapescope-Budget: tripped` |
 | host matches `--deny-host` or `--deny-catalog` | `403`, `X-Scrapescope-Error: denied` |
@@ -65,8 +65,8 @@ self-loop`, status `failed:self_loop`), and in sizing mode a non-global
 destination, this machine's own address or a host on its own IPv6 link
 (`403 private-address`, see
 [Sizing mode and private addresses](#sizing-mode-and-private-addresses)).
-scrapescope's own responses carry `Connection: close`, a fixed one-line body
-and never echo request content. After sending one, scrapescope keeps reading
+Scrapescope's own responses carry `Connection: close`, a fixed one-line body
+and never echo request content. After sending one, Scrapescope keeps reading
 the client's connection for up to a second before closing it, so the reply is
 not lost to a TCP reset. When your provider resets a connection during a relay,
 your client gets a TCP reset too (tunnel status `failed:upstream_reset`), so a
@@ -74,7 +74,7 @@ truncated response is never passed off as complete.
 
 ### Error codes
 
-scrapescope's own error replies carry `X-Scrapescope-Error: <code>` (except the
+Scrapescope's own error replies carry `X-Scrapescope-Error: <code>` (except the
 bare origin-form 403). The codes are: `bad-request`, `https-absolute-form`,
 `self-loop`, `token-required`, `bad-token`, `auth-challenge`, `budget`,
 `denied`, `upstream-unreachable`, `upstream-timeout`, `upstream-closed`,
@@ -83,14 +83,14 @@ bare origin-form 403). The codes are: `bad-request`, `https-absolute-form`,
 `connect-refused`, `connect-timeout`, `local-limit` (503: the meter ran out of
 file descriptors on this machine; see [Resource use](#resource-use)) and
 `internal-error`. A non-2xx reply from your provider is relayed as it is,
-without a scrapescope header.
+without a Scrapescope header.
 
 ## Tokens
 
 Each `serve` creates a fresh token of 24 URL-safe characters from Python's
 `secrets` module (about 144 bits). Clients present it as the proxy username
 `ss-<token>`, or `ss-<token>~<provider-username>` to pass their own provider
-username through. scrapescope strips the prefix; the token never reaches your
+username through. Scrapescope strips the prefix; the token never reaches your
 provider.
 
 | Command | Tokenless connections | Why |
@@ -140,12 +140,12 @@ history; most shells skip lines that start with a space when configured to
 
 While `run` or `find` is running, any process on the machine that can reach
 `127.0.0.1` and finds the port (by scanning, for example) can send traffic
-through scrapescope. For a request without credentials, scrapescope injects
+through Scrapescope. For a request without credentials, Scrapescope injects
 the credentials from your upstream environment variable, so that traffic goes
 through your provider **and is billed to you**. On a single-user laptop the
 other local processes are your own; on a shared machine they may not be.
 
-The Playwright MCP fix that scrapescope suggests runs the MCP server under
+The Playwright MCP fix that Scrapescope suggests runs the MCP server under
 `scrapescope run` (`scrapescope run --budget 2GB --deny-catalog background
 --quiet -- sh -c 'exec npx -y @playwright/mcp@X.Y.Z --proxy-server
 "$SCRAPESCOPE_PROXY_URL" ...'`, with your usual `--upstream-from-env VAR` or
@@ -157,7 +157,7 @@ version you reviewed instead of `X.Y.Z`.
 
 Mitigations:
 
-- Set `--budget`. The budget counts all traffic through scrapescope, so it caps
+- Set `--budget`. The budget counts all traffic through Scrapescope, so it caps
   what another local process could spend. Without a budget, nothing caps it.
   The meter stops at its own count: bytes already in flight when it trips can
   add up to a few MB per open tunnel at your provider.
@@ -176,14 +176,14 @@ A web page open in your desktop browser can send requests to
 `127.0.0.1:<port>`, either directly or through DNS rebinding. Browsers send
 such page requests in origin form (`GET /path` with a `Host` header); a page
 cannot issue `CONNECT` or an absolute-form proxy request with `fetch` or XHR.
-scrapescope refuses every origin-form request with a bare 403 before contacting
+Scrapescope refuses every origin-form request with a bare 403 before contacting
 anything, serves no readable pages and has no HTTP API (the helpers use a
 private file, not a network channel). A page therefore can neither read from
-scrapescope nor use it as a proxy.
+Scrapescope nor use it as a proxy.
 
 ## Sizing mode and private addresses
 
-In sizing mode (`--direct`), scrapescope connects to targets itself, so a page
+In sizing mode (`--direct`), Scrapescope connects to targets itself, so a page
 loaded through it (by `find`, or by your job's browser) could otherwise reach
 services on your machine or network: a router's admin page, a local database's
 HTTP port, or a cloud metadata service at `169.254.169.254`. Browsers protect
@@ -191,7 +191,7 @@ against this with Private Network Access and Local Network Access, but those
 protections do not apply here: a browser treats a proxied request as coming
 from the proxy, which is on loopback, so it allows it.
 
-So on the direct route scrapescope resolves the name once, refuses destinations
+So on the direct route Scrapescope resolves the name once, refuses destinations
 that are not globally routable, and connects only to the addresses it checked
 (DNS pinning, so a second DNS answer cannot redirect it). When a name has
 several addresses, every one is checked, and they are tried Happy-Eyeballs
@@ -216,7 +216,7 @@ one fails, one overall deadline):
   routable address can be this machine's own (most IPv6-enabled machines, and
   servers with a public IPv4 address on an interface, have one), and a
   service bound to all interfaces answers there. So after the TCP connection
-  is made and before any byte is written, scrapescope compares the peer with
+  is made and before any byte is written, Scrapescope compares the peer with
   the socket's own source address and refuses a match; for IPv6 it also
   refuses a peer in the same /64 as the source address (hosts on this
   machine's own link, such as a router or NAS). Limit: IPv4 netmasks are not
@@ -275,16 +275,16 @@ does not apply; what the provider can reach is its concern.
 
 ## TLS
 
-- scrapescope never terminates TLS. CONNECT tunnels are relayed as opaque
+- Scrapescope never terminates TLS. CONNECT tunnels are relayed as opaque
   bytes, so there is no certificate to install and your client's TLS
   fingerprint is unchanged.
 - It never originates TLS: absolute-form `https://` requests are refused.
 - v1 does not support TLS to the proxy (`https://` proxy URLs are rejected with
   exit code 89). With an `http://` provider URL, the CONNECT request and its
   `Proxy-Authorization` header travel to your provider unencrypted, exactly as
-  they would without scrapescope.
-- Plain `http://` target traffic passes through scrapescope unencrypted, as it
-  does through any HTTP proxy. scrapescope parses the HTTP framing to relay it
+  they would without Scrapescope.
+- Plain `http://` target traffic passes through Scrapescope unencrypted, as it
+  does through any HTTP proxy. Scrapescope parses the HTTP framing to relay it
   and keeps nothing but metadata.
 
 ## Credentials
@@ -293,7 +293,7 @@ does not apply; what the provider can reach is its concern.
 
 The upstream proxy URL, which usually contains your provider username and
 password, is read only from an environment variable (`--upstream-from-env
-VAR`, or `HTTPS_PROXY`). scrapescope never accepts it as a command-line
+VAR`, or `HTTPS_PROXY`). Scrapescope never accepts it as a command-line
 argument, because other users can often read a process's arguments (for
 example with `ps`), while its environment is readable only by the same user and
 root.
@@ -305,7 +305,7 @@ permissions or from a secret manager.
 ### What your job receives
 
 In the default mode, the upstream variable in your job's environment is
-replaced by scrapescope's address (`http://127.0.0.1:<port>`, no credentials),
+replaced by Scrapescope's address (`http://127.0.0.1:<port>`, no credentials),
 and so is any other proxy variable (a `*_proxy` name in any case, `NO_PROXY`
 excepted) that names the same upstream: the same host, port and credentials,
 whatever the host's case, with or without the scheme (`user:pass@host:port`),
@@ -314,7 +314,7 @@ are replaced only when they hold exactly the same URL, whatever their name.
 Your job never sees the upstream URL through those variables. If your job
 passes its proxy URL to something that does not run on this machine (a cloud
 browser session, a remote worker, a configuration file it writes out), keep
-that URL in a variable scrapescope does not touch, since the replaced ones
+that URL in a variable Scrapescope does not touch, since the replaced ones
 now point at `127.0.0.1`. When a proxy variable still names your provider's
 host on another port or scheme, or with other credentials, or carries its
 username and password on another host, `run` prints a note at start and the
@@ -339,7 +339,7 @@ twin of the metered variable, otherwise "clients use it for http:// URLs",
 "clients use it for https:// URLs" or "clients without a scheme-specific
 proxy variable use it". Neither warning sets the report's `incomplete` flag,
 which only the bypass check sets.
-scrapescope cannot know about credentials your job keeps elsewhere (for
+Scrapescope cannot know about credentials your job keeps elsewhere (for
 example a `PROVIDER_PASSWORD` variable or a config file); those are left
 untouched.
 
@@ -352,7 +352,7 @@ it; it is a salted fingerprint, not a secret.
 
 ### What is forwarded
 
-| Client sends | scrapescope does | Recorded as |
+| Client sends | Scrapescope does | Recorded as |
 |---|---|---|
 | no credentials | `serve` with a token, or the auth listener: 407. Otherwise injects the credentials from the upstream variable, if any | `injected` or `none` |
 | username exactly `ss-<token>` | strips it and injects the upstream variable's credentials | `injected` or `none` |
@@ -375,7 +375,7 @@ it; it is a salted fingerprint, not a secret.
 - In direct (sizing) mode, client credentials are dropped and never sent
   anywhere.
 - Your provider's reply to CONNECT (including 407, 502 and vendor error
-  headers) is relayed to your client unchanged. scrapescope does not print or
+  headers) is relayed to your client unchanged. Scrapescope does not print or
   store it.
 
 ### Never logged, printed or stored
@@ -401,7 +401,7 @@ open it for appending only; they never create it or follow a missing path. It
 holds metadata only (see [privacy.md](privacy.md)) and is deleted after the
 run unless you pass `--keep-events`.
 
-Your job can write anything to that file. scrapescope parses every line
+Your job can write anything to that file. Scrapescope parses every line
 strictly: fixed field types, charsets and lengths, at most 4,096 bytes per
 line, and invalid lines dropped and counted. A hostile line therefore cannot
 inject markup into a report. A job can still deliberately distort its own
@@ -436,7 +436,7 @@ from a file are never shown as stored, in any output format (`--format json`
 included): their title, code and caveats are rebuilt from the fix id and the
 catalogs, the detection is shown as report data, and the text and HTML
 renderers say so. The schema allows only the six fix ids
-scrapescope generates, so a file with any other id fails validation.
+Scrapescope generates, so a file with any other id fails validation.
 
 ## find
 
@@ -462,7 +462,7 @@ scrapescope generates, so a file with any other id fails validation.
   browser only. Browsers in your own `run` jobs keep their WebRTC behaviour;
   `launch(..., webrtc_proxied_only=True)` in the Playwright helper, or the same
   Chromium switch in your launcher, applies it there. UDP is never carried or
-  counted by scrapescope.
+  counted by Scrapescope.
 - Starter code contains the full URL of the match. Read it before running it.
 - `--verify` sends one GET with no cookies, captured headers or tokens, and
   identifies itself with the user agent
@@ -481,21 +481,21 @@ scrapescope generates, so a file with any other id fails validation.
 
 ## Test-only settings
 
-`SCRAPESCOPE_TEST_CONNECT_MAP` (redirects scrapescope's own direct connections)
+`SCRAPESCOPE_TEST_CONNECT_MAP` (redirects Scrapescope's own direct connections)
 and `SCRAPESCOPE_TEST_CA` (a CA bundle; also makes `find`'s browser ignore
 certificate errors) are honoured only when `SCRAPESCOPE_TESTING=1`. Never set
 these outside the test suite.
 
 ## No telemetry
 
-scrapescope has no telemetry, analytics, crash reporting or update checks, and
+Scrapescope has no telemetry, analytics, crash reporting or update checks, and
 never contacts ipvolt. It makes network connections only for your job's
 traffic, for the page `find` loads (and everything that page loads), and for the
 single `--verify` request. In sizing mode it resolves your job's hostnames with
 the system resolver. With a provider configured, target hostnames go to the
 provider unresolved on HTTP CONNECT and SOCKS5 routes, and the only lookup it
 makes for them is of the provider's own hostname. The one exception is
-direct.json hosts under `run --env-all` (LLM APIs): scrapescope resolves those
+direct.json hosts under `run --env-all` (LLM APIs): Scrapescope resolves those
 names itself and connects to them from this machine's own IP address, for
 every client of the meter, a browser included. `run` prints a note saying so at
 start (unless `--quiet`), and the report carries a warning when such tunnels
@@ -505,7 +505,7 @@ address to the bucket owner.
 
 ## Resource use
 
-scrapescope does not rate-limit local clients. Response bodies are relayed as
+Scrapescope does not rate-limit local clients. Response bodies are relayed as
 they arrive through bounded buffers and never accumulated in memory; `find`
 reads text bodies into memory up to its size cap, and `--verify` bounds both
 the received and the decoded bytes. The budget bounds bytes, not connections.
@@ -514,7 +514,7 @@ the received and the decoded bytes. The budget bounds bytes, not connections.
   client's socket and the upstream socket). `run`, `serve` and `find` raise
   their own soft open-files limit (`RLIMIT_NOFILE`) to the hard limit, at most
   65,536; `run` does it after starting your job, so the job keeps its original
-  limit. With a hard limit below 1,024, scrapescope prints a note at start.
+  limit. With a hard limit below 1,024, Scrapescope prints a note at start.
   When descriptors run out, a tunnel that cannot be opened fails as
   `failed:local_limit` (the client gets `503` with `X-Scrapescope-Error:
   local-limit`), a listener that cannot accept pauses for about a second
@@ -555,7 +555,7 @@ the received and the decoded bytes. The budget bounds bytes, not connections.
   forwarder parses untrusted HTTP/1.1 from clients and origins with it. The
   optional `[browser]` extra adds Playwright, whose `playwright install
   chromium` downloads a Chromium build from Playwright's servers.
-- **Releases.** scrapescope is installed from its GitHub repository
+- **Releases.** Scrapescope is installed from its GitHub repository
   (`git+https://github.com/ipvolt/scrapescope`); pin a tag or commit with
   `@<ref>` when you need a fixed revision. PyPI publication is planned, not
   yet in place: packages are to be published from CI with PyPI Trusted
@@ -566,7 +566,7 @@ the received and the decoded bytes. The budget bounds bytes, not connections.
   exist ([release checklist](dev/release-checklist.md)).
 - **Catalogs.** The JSON catalogs are data, reviewed by the maintainer. They can
   label hosts, deny hosts you ask to deny, and classify responses; they cannot
-  make scrapescope contact anything.
+  make Scrapescope contact anything.
 - **Your side.** Pin the version you use in CI, and install with hashes
   (`pip install --require-hashes`) where you can.
 
