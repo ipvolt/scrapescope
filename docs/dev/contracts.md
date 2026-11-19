@@ -1,12 +1,12 @@
-# scrapescope v1: module contracts
+# Scrapescope v1: module contracts
 
-This is the developer reference for scrapescope's internals. It fixes the
+This is the developer reference for Scrapescope's internals. It fixes the
 public API of every module, the data that crosses module boundaries, the
 forwarder's wire behaviour, the events file, report.json, the CLI surface and
 the exit codes. User-facing behaviour is described in the README and the other
 files in `docs/`; this file is for people changing the code.
 
-How it came about: scrapescope v1 was built in parallel, with each part of the
+How it came about: Scrapescope v1 was built in parallel, with each part of the
 tree owned separately (section 1), and this file was the contract between the
 parts. The requirements came from ipvolt's internal project
 plan and a build brief, which are not published; section 16 lists every place
@@ -272,7 +272,7 @@ never affects the connection to the upstream proxy itself.
 | Client request | Response | Recorded as |
 |---|---|---|
 | absolute-form `https://...` | `400`, `X-Scrapescope-Error: https-absolute-form` (no TLS origination) | `refused["https_absolute_form"]` |
-| origin-form (`GET /x`), asterisk-form, or any other form | `403`, `Content-Length: 0`, `Connection: close`, no body and no scrapescope headers (DNS-rebinding defence) | `refused["origin_form"]` |
+| origin-form (`GET /x`), asterisk-form, or any other form | `403`, `Content-Length: 0`, `Connection: close`, no body and no Scrapescope headers (DNS-rebinding defence) | `refused["origin_form"]` |
 | malformed request or authority, bad port | `400`, `X-Scrapescope-Error: bad-request` | `refused["bad_request"]` |
 | target is the meter itself (`localhost` or a loopback literal, port = `port` or `auth_port`). Literals are parsed like `getaddrinfo`: legacy IPv4 spellings (`127.1`, `0x7f.0.0.1`, `2130706433`, `127.000.000.001`, `0177.0.0.1`) and `::ffff:127.0.0.1` count | `403`, `X-Scrapescope-Error: self-loop` | `refused["self_loop"]` |
 | token required, missing or not `ss-<token>`-prefixed | `407`, `Proxy-Authenticate: Basic realm="scrapescope"` | `refused["token_required"]` |
@@ -696,7 +696,7 @@ Package `scrapescope.helpers`. `helpers/__init__.py` imports nothing heavy.
 All helpers are no-ops, with ONE `RuntimeWarning` per process, when
 `SCRAPESCOPE_EVENTS` is unset ("scrapescope helpers inactive:
 SCRAPESCOPE_EVENTS is not set; run the job under `scrapescope run`"). They
-never raise into the user's code because of scrapescope problems.
+never raise into the user's code because of Scrapescope problems.
 
 ### 5.1 `scrapescope.helpers.events`
 
@@ -850,7 +850,7 @@ closed, or it is garbage-collected or the interpreter exits;
 `encoded_body_bytes` = raw bytes read (urllib3 `raw.tell()`), null for chunked
 bodies and never the declared `Content-Length`. Both hooks write request and
 response header sizes as null on HTTP/2 and HTTP/3. Hooks never read or store
-bodies for scrapescope's purposes.
+bodies for Scrapescope's purposes.
 
 ---
 
@@ -1666,7 +1666,7 @@ Round 2 additions:
 - `report.dumps` (used by `scrapescope report FILE --format json`) also
   rebuilds a report file's fixes from their ids (title, code and caveats
   regenerated), so no output format presents a file's own code as
-  scrapescope's.
+  Scrapescope's.
 - find reports: the "top match" share uses the same basis and top match as
   the terminal: the DevTools-reported page load as denominator, a numerator
   that includes the TLS estimate (stated), and the first-ranked response with
@@ -1861,7 +1861,7 @@ message suggesting `--direct`. The upstream URL is never accepted on argv.
    message naming the heaviest hosts, `killpg(SIGTERM)`, then `killpg(SIGKILL)`
    after `STOP_GRACE_S` unless the whole group has already exited (so a
    grandchild that ignores SIGTERM is still stopped). SIGINT, SIGTERM and
-   SIGHUP received by scrapescope are forwarded to the child's group; a second
+   SIGHUP received by Scrapescope are forwarded to the child's group; a second
    SIGINT sends SIGKILL.
 5. After the child exits, allow up to 1 s for tunnels to drain, then
    `stop()` for the final snapshot; `read_events`; `attribute(...,
