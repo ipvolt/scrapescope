@@ -1308,7 +1308,9 @@ def test_fulfilled_responses_are_recognised_by_their_missing_server_address_with
 
 def test_route_wrappers_tag_the_request_and_keep_the_original_behaviour() -> None:
     # pkg-r3-1: Playwright is an optional extra; the suite's non-browser part runs without it.
-    Route = pytest.importorskip("playwright._impl._network").Route
+    pytest.importorskip("playwright")
+    Route = ssp._route_class()
+    assert Route is not None, "Playwright's internal Route class moved again; update _route_class()"
 
     ssp._tag_routes()
     assert getattr(Route.fulfill, ssp._ROUTE_ATTR) == "fulfilled" and getattr(Route.abort, ssp._ROUTE_ATTR) == "aborted"
@@ -1498,7 +1500,11 @@ def test_fetch_aborted_by_navigation_is_written_at_close_and_its_bytes_stay_unre
     events = _events(events_file)
     requests = [e for e in events if isinstance(e, RequestEvent)]
     (big,) = _by_path(requests, "origin-a.test", "/big.bin")
-    assert big.failed and big.encoded_body_bytes is None and big.reported_bytes == 0
+    # Up to Playwright 1.64 nothing was reported for this fetch; from 1.65 its two header blocks are. Either
+    # way the aborted body stays unreported.
+    assert big.failed and big.encoded_body_bytes is None
+    assert big.reported_bytes == (big.response_header_bytes or 0) + (big.request_header_bytes or 0)
+    assert big.reported_bytes < 16_384
     snapshot = _snapshot(_tunnels_from_upstream(fresh_world.http_upstream_noauth.records()), started)
     result = attribute(snapshot, events, _fixture_catalogs())
     row = next(h for h in result.hosts if h.host == "origin-a.test")
