@@ -1,0 +1,98 @@
+# Release workflow for scrapescope. Every action is pinned to a full commit SHA (release checklist,
+# item 11); the comment after each SHA names the version tag it was resolved from on 2026-09-25.
+#
+# - Publishing a GitHub release builds the sdist and wheel from the tagged commit and uploads them
+#   to PyPI with Trusted Publishing (environment "pypi").
+# - Running the workflow by hand (workflow_dispatch) builds the selected ref and uploads to TestPyPI
+#   instead (environment "testpypi"), so a release can be tried first.
+#
+# No API token or repository secret is used: each upload job requests a short-lived OIDC token
+# (id-token: write) that PyPI exchanges for an upload credential. The one-time Trusted Publisher
+# setup on pypi.org and test.pypi.org is in docs/dev/release-checklist.md (item 19).
+name: release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build the sdist and wheel
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
+        with:
+          python-version: "3.12"
+      - name: Check that the release tag matches the package version
+        if: github.event_name == 'release'
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          version="$(sed -n 's/^__version__ = "\(.*\)"$/\1/p' src/scrapescope/_version.py)"
+          if [ "$TAG" != "v$version" ]; then
+            echo "Release tag '$TAG' does not match the package version 'v$version' in src/scrapescope/_version.py." >&2
+            exit 1
+          fi
+      - name: Build
+        run: uv build
+      - name: Check the archives (metadata, README rendering, release gate)
+        run: |
+          uvx twine check --strict dist/*
+          uv run --no-project --python 3.12 scripts/release_check.py
+      - name: Install the wheel into a fresh environment and run the command
+        run: |
+          uv venv --python 3.12 "$RUNNER_TEMP/wheel"
+          uv pip install --python "$RUNNER_TEMP/wheel/bin/python" "$(ls dist/*.whl)[browser]"
+          "$RUNNER_TEMP/wheel/bin/scrapescope" --version
+          "$RUNNER_TEMP/wheel/bin/scrapescope" --help > /dev/null
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: dist
+          path: dist/
+          if-no-files-found: error
+
+  publish-pypi:
+    name: Publish to PyPI
+    if: github.event_name == 'release'
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment:
+      name: pypi
+      url: https://pypi.org/p/scrapescope
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
+
+  publish-testpypi:
+    name: Publish to TestPyPI
+    if: github.event_name == 'workflow_dispatch'
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/scrapescope
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
+        with:
+          repository-url: https://test.pypi.org/legacy/
