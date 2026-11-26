@@ -1,15 +1,15 @@
 # Accuracy: what each figure means
 
-scrapescope measures on your machine. Your provider bills from its own meter.
-This document says how close each scrapescope figure can be to what a
+Scrapescope measures on your machine. Your provider bills from its own meter.
+This document says how close each Scrapescope figure can be to what a
 provider bills, where the two can differ, and what has and has not been
 checked. [method.md](method.md) describes how each figure is computed.
 
 > **Status.** No reconciliation against any provider's billing has been
-> published yet. Until one passes for a kind of workload, no scrapescope figure
+> published yet. Until one passes for a kind of workload, no Scrapescope figure
 > is billing-grade, and every cost is an estimate. Behaviour claims are tracked
 > in [method.md](method.md#claims-to-verify), where each names its test. The
-> local tests show that scrapescope's counts equal the bytes the test provider
+> local tests show that Scrapescope's counts equal the bytes the test provider
 > counted on the same connections; they say nothing about any real provider's
 > billing.
 
@@ -30,15 +30,15 @@ of these labels.
 | **estimated billable transfer** | every cost | tunnel-measured bytes × your rate | An estimate: see the list below |
 
 Only [method.md](method.md) calls tunnel counts "exact", and only in the
-narrow sense of a complete count of the bytes at scrapescope's upstream
+narrow sense of a complete count of the bytes at Scrapescope's upstream
 socket. Elsewhere they are "tunnel-measured".
 
 ## Why a provider's figure can differ from the tunnel-measured total
 
 - **The CONNECT exchange.** Some providers may count the CONNECT request and
   reply (including your `Proxy-Authorization` header), others only the tunnel
-  payload. scrapescope reports both totals. Which one a given provider bills is
-  unverified. Through a provider, the CONNECT head scrapescope forwards is your
+  payload. Scrapescope reports both totals. Which one a given provider bills is
+  unverified. Through a provider, the CONNECT head Scrapescope forwards is your
   client's own, unchanged apart from `Proxy-Authorization`: Chromium's is
   about 236 bytes (`Host`, `Proxy-Connection` and its `User-Agent`), before
   credentials. In sizing mode the "with CONNECT" estimate uses that same head
@@ -46,54 +46,54 @@ socket. Elsewhere they are "tunnel-measured".
   credentials line (`Proxy-Authorization: Basic ` plus the base64 of
   `username:password`, often 50 to 150 bytes) comes on top, per tunnel. That
   matters for workloads that open many short tunnels.
-- **Plain `http://` requests in sizing mode.** scrapescope sends them to the
+- **Plain `http://` requests in sizing mode.** Scrapescope sends them to the
   target in origin form (`GET /path`) without `Proxy-Authorization`. Through
   an HTTP CONNECT provider every request carries the absolute-form target
   (`http://host[:port]` more per request line) and the credentials line
-  instead. scrapescope adds no estimate for this, and the "estimated" mark on
+  instead. Scrapescope adds no estimate for this, and the "estimated" mark on
   the with-CONNECT total reflects CONNECT tunnels only. In one local test, ten
   small identical requests moved 87 bytes up per request in sizing mode and
   196 through the test provider, 20% more for that small response.
 - **Plain `http://` requests through an HTTP CONNECT provider.** A client
   sends proxy-hop headers to its proxy; Chromium sends `Proxy-Connection:
-  keep-alive` (30 bytes with its line ending). scrapescope is that proxy, so
+  keep-alive` (30 bytes with its line ending). Scrapescope is that proxy, so
   it removes them, as it removes every hop-by-hop header, and your provider
   receives about 30 bytes less per plain `http://` request than the same
   client would send it directly. HTTPS traffic is unaffected: CONNECT heads
   are forwarded unchanged apart from `Proxy-Authorization`.
-- **TLS handshakes.** They are inside the tunnel, so scrapescope counts them.
+- **TLS handshakes.** They are inside the tunnel, so Scrapescope counts them.
   At least one provider's public traffic documentation says it bills them
   (checked 2026-09-23); many providers do not say.
-- **Units.** scrapescope defaults to GB = 10^9 bytes; `--gib` switches to
+- **Units.** Scrapescope defaults to GB = 10^9 bytes; `--gib` switches to
   GiB = 2^30, which is about 7.4% larger. Check which your provider uses.
 - **Errors.** Providers differ on whether target error responses (403, 404,
   5xx) and their own errors (for example a 502 from the provider) are billed.
-  scrapescope counts every byte on the socket, including failed tunnels.
-- **Slow CONNECT replies.** scrapescope waits up to 600 seconds (its idle
+  Scrapescope counts every byte on the socket, including failed tunnels.
+- **Slow CONNECT replies.** Scrapescope waits up to 600 seconds (its idle
   timeout) for a provider's CONNECT or SOCKS5 reply; only name resolution and
   the TCP connect have the 30-second connect timeout. A client that gives up
-  and closes its connection while scrapescope waits ends the wait at once
+  and closes its connection while Scrapescope waits ends the wait at once
   (status `failed:client_closed`), so the provider sees the attempt
-  abandoned as it would without scrapescope. A provider may still bill an
+  abandoned as it would without Scrapescope. A provider may still bill an
   attempt that it was working on when the client left.
 - **Rounding, minimums and dashboard lag.** A provider may round per request or
   per session, apply minimum charges, or update its dashboard hours later.
-- **Plain `http://` framing.** scrapescope counts what it reads from the
+- **Plain `http://` framing.** Scrapescope counts what it reads from the
   provider, before it re-frames a plain-HTTP response for your client (it
   may choose other chunk sizes, and it removes whitespace before a header
-  colon, which RFC 9112 has a proxy remove). Bytes between scrapescope and
+  colon, which RFC 9112 has a proxy remove). Bytes between Scrapescope and
   your client can therefore differ slightly from the counted bytes; the
   counted bytes are what crossed the provider connection. A response that
   uses a transfer coding other than chunked (`gzip, chunked`) reaches
   HTTP/1.1 clients as sent; HTTP/1.0 clients get `502
   upstream-protocol-error` for it.
-- **Layer.** scrapescope counts application-layer bytes on its socket. It does
+- **Layer.** Scrapescope counts application-layer bytes on its socket. It does
   not count TCP/IP headers or retransmissions. A provider measuring at a
   different layer, or between its own servers and the target, can differ.
 - **Bytes after a budget trip.** The meter stops at its own count. Data already
-  in flight when the budget trips can reach the provider after scrapescope
+  in flight when the budget trips can reach the provider after Scrapescope
   stops reading: roughly a few MB per open tunnel.
-- **Traffic that skipped scrapescope.** A client not pointed at scrapescope is
+- **Traffic that skipped Scrapescope.** A client not pointed at Scrapescope is
   billed by your provider but not counted here. The bypass detector catches
   this only for clients that use the helpers or hooks.
 
@@ -109,7 +109,7 @@ kept in the label.
 
 A request cannot be tied to a tunnel. Chromium's connection ids are internal,
 and a proxied request reports the proxy's address, not the tunnel's. So
-scrapescope works per host:
+Scrapescope works per host:
 
 - The host's tunnel bytes are measured.
 - The browser reports sizes per request (encoded body, response headers,
@@ -142,8 +142,8 @@ Consequences:
   is not the request line a proxy receives, so reported request heads sit
   slightly below the wire on every route; the allocation's allowance absorbs
   the difference. For plain `http://` requests the helper also leaves out
-  the proxy-hop headers Chromium sends to scrapescope (`Proxy-Connection`,
-  and `Proxy-Authorization` after a 407), which scrapescope removes; `find`
+  the proxy-hop headers Chromium sends to Scrapescope (`Proxy-Connection`,
+  and `Proxy-Authorization` after a 407), which Scrapescope removes; `find`
   does the same for its billed basis.
 - **HTTP/2 and HTTP/3.** Playwright rebuilds the request-header size as
   HTTP/1.1 text (about 550-780 bytes per request, while HPACK and QPACK send far
@@ -194,10 +194,10 @@ Consequences:
 
 Playwright disables Chromium's HTTP cache whenever a browser or context holds
 proxy or HTTP credentials. With the helper's `proxy_settings()` or `launch()`
-without a username, the cache stays on, because scrapescope adds your provider
+without a username, the cache stays on, because Scrapescope adds your provider
 credentials itself. If your job passes a username and password (at launch or
 per context), later page loads re-download assets they would otherwise take
-from the cache. That is also how the job behaves without scrapescope, so the
+from the cache. That is also how the job behaves without Scrapescope, so the
 measurement is faithful, but a fix that assumes a warm cache will overstate its
 saving.
 
@@ -216,7 +216,7 @@ observation of what the browser intended:
   (measured with Chromium 153). A short real request to a host the helper did
   not see could fall under the same threshold.
 - **before_attach** depends on wall-clock timestamps from two processes, the job
-  and scrapescope, on the same machine.
+  and Scrapescope, on the same machine.
 
 ## Units, per-unit figures and success
 
@@ -246,7 +246,7 @@ observation of what the browser intended:
   `instrument(context)` count one launch in either order. When browser request types exist but no launch was
   recorded, the report says "browser launches: not recorded" instead of 0.
 - **Success** is a 2xx or 304 status on a unit request that did not fail. A 200
-  can still be a challenge or an empty page; scrapescope does not inspect page
+  can still be a challenge or an empty page; Scrapescope does not inspect page
   content outside `find`.
 
 ## Hook-reported sizes
@@ -270,7 +270,7 @@ observation of what the browser intended:
   for unknown headers.
 - HTTPX 0.28 cannot send a plain `http://` request to an IPv6 literal
   through an HTTP proxy (it writes the absolute-form target without brackets,
-  `GET http://::1:8080/x`, and scrapescope answers `400 bad-request`), and it
+  `GET http://::1:8080/x`, and Scrapescope answers `400 bad-request`), and it
   rejects legacy IPv4 spellings such as `1.2.3.04`. The same limit applies
   to `find --verify`, which uses HTTPX: the replay of such a URL is `not
   tested (the meter answered itself (bad-request))`.
@@ -354,7 +354,7 @@ Other limits of `find`:
 - Requests from dedicated workers cannot be told apart from frame requests in
   Playwright, so they are inspected but labelled by resource type only.
 - When your provider answers 407, Chromium waits for credentials instead of
-  failing. scrapescope watches its own tunnel records and ends the page load
+  failing. Scrapescope watches its own tunnel records and ends the page load
   early with "the upstream proxy answered 407"; the same applies to a SOCKS5
   authentication failure or an unreachable provider.
 - XHR, fetch, iframe documents and any non-2xx or 202 sub-response are
@@ -407,10 +407,10 @@ the absolute-form target and your credentials line on every request (see
 ## Blind spots
 
 - **Hosted browsers** (cloud browser services): their proxy traffic leaves
-  from the service's cloud, so a local meter cannot see it. scrapescope makes
+  from the service's cloud, so a local meter cannot see it. Scrapescope makes
   no claims about them.
-- **Clients not pointed at scrapescope**: counted by your provider, not here.
-- **UDP, QUIC and WebRTC**: scrapescope carries TCP only. That Chromium does
+- **Clients not pointed at Scrapescope**: counted by your provider, not here.
+- **UDP, QUIC and WebRTC**: Scrapescope carries TCP only. That Chromium does
   not use QUIC (HTTP/3) through an HTTP proxy, so its traffic stays inside the
   metered tunnels, was checked for Playwright's headless shell on 2026-09-23
   (two en.wikipedia.org loads: HTTP/2 only, no UDP sockets in the job's
@@ -426,8 +426,8 @@ the absolute-form target and your credentials line on every request (see
   every figure here.
 - **DNS**: with a provider configured, target names are resolved by the
   provider and that traffic is not visible. The exception is direct.json hosts
-  under `run --env-all`, which scrapescope resolves and connects to from your
-  own IP address. In sizing mode, scrapescope resolves names with the system
+  under `run --env-all`, which Scrapescope resolves and connects to from your
+  own IP address. In sizing mode, Scrapescope resolves names with the system
   resolver and refuses non-global addresses unless `--allow-private-targets`;
   DNS traffic is not counted.
 - **Firefox and WebKit** (Playwright without DevTools network data): with the
@@ -445,4 +445,4 @@ Costs are `bytes / unit × your rate`, shown with and without CONNECT, per run,
 per 1,000 units and, when success is known, per 1,000 successes. They leave out
 plan tiers, minimum commitments, per-request fees, taxes, rounding and
 everything listed above. They are labelled "estimated billable transfer" and
-appear only when you pass `--rate`. scrapescope has no default rate.
+appear only when you pass `--rate`. Scrapescope has no default rate.

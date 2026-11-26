@@ -1,19 +1,19 @@
-scrapescope
+Scrapescope
 Copyright (c) 2026 ipvolt
 
-scrapescope is released under the MIT License (see LICENSE).
+Scrapescope is released under the MIT License (see LICENSE).
 
 ipvolt's commitment
 -------------------
-ipvolt, a proxy provider, started and maintains scrapescope. We commit that:
+ipvolt, a proxy provider, started and maintains Scrapescope. We commit that:
 
-1. scrapescope stays free and MIT-licensed. There is no paid tier, licence key,
+1. Scrapescope stays free and MIT-licensed. There is no paid tier, licence key,
    usage limit or feature held back for ipvolt customers, and we will not
    relicense existing or future releases under more restrictive terms.
-2. scrapescope works with any proxy provider, or with no provider at all
+2. Scrapescope works with any proxy provider, or with no provider at all
    (direct "sizing" mode). It has no ipvolt default upstream, rate or account,
    and it never favours ipvolt in what it measures or recommends.
-3. scrapescope never contacts ipvolt. It has no telemetry, analytics, crash
+3. Scrapescope never contacts ipvolt. It has no telemetry, analytics, crash
    reporting or update checks. It makes network connections only on behalf of
    the job you run through it, the page you ask `scrapescope find` to load, and
    the single replay request you ask for with `--verify`.

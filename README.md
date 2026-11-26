@@ -1,14 +1,14 @@
-# scrapescope
+# Scrapescope
 
 Find the smallest response that already contains the data your scraper needs.
 See every host the job talked to, including traffic the browser started by
-itself, and how many bytes each part used. scrapescope runs locally and works
+itself, and how many bytes each part used. Scrapescope runs locally and works
 with any proxy provider or none. It is open source under the MIT licence.
 
-scrapescope is built and maintained at ipvolt, a proxy provider. It works with
+Scrapescope is built and maintained at ipvolt, a proxy provider. It works with
 any provider or none and never contacts ipvolt.
 
-**It stays free.** ipvolt commits that scrapescope stays free and MIT-licensed.
+**It stays free.** ipvolt commits that Scrapescope stays free and MIT-licensed.
 There is no paid tier, licence key, usage limit or feature held back for ipvolt
 customers. It has no default provider, rate or account, no telemetry and no
 update checks. The full commitment is in [NOTICE](https://github.com/ipvolt/scrapescope/blob/main/NOTICE). If a release breaks
@@ -41,7 +41,7 @@ match says whether the browser sent cookies, an `Authorization` header, a
 token-like request header or a random-looking token for it. Starter code
 (`curl` and `httpx`) is printed only for plain GET requests that sent none of
 those and, while some response holds every value, only for such a response; a
-response that lacks a value says which one. With `--verify`, scrapescope fetches the top eligible match once more
+response that lacks a value says which one. With `--verify`, Scrapescope fetches the top eligible match once more
 without a browser, without cookies or captured headers, and reports whether it
 still works: `yes`, `no` or `not tested`. When a higher-ranked match is
 ineligible only because of the cookies or a token header the browser sent,
@@ -54,7 +54,7 @@ found", and a data request that was itself challenged is named in a warning.
 each CONNECT request and a stream of encrypted bytes. It cannot see inside TLS,
 so it cannot tell you which resource type or request used the bytes, which
 component of the browser fetched something the job never asked for, or what
-blocking would change. scrapescope sits on your machine in front of your
+blocking would change. Scrapescope sits on your machine in front of your
 provider. It counts the bytes of every tunnel at the socket to the provider and
 joins those counts to what the browser helper reports. From that it produces:
 
@@ -79,7 +79,7 @@ joins those counts to what the browser helper reports. From that it produces:
   your own `--rate`, an estimated cost per run, per 1,000 units and per 1,000
   successful units.
 
-**A byte budget.** `--budget 2GB` stops a runaway job. scrapescope warns at 80%.
+**A byte budget.** `--budget 2GB` stops a runaway job. Scrapescope warns at 80%.
 At 100% it closes every tunnel, refuses new ones, stops your job's whole
 process group and names the heaviest hosts of the final minute. The meter stops
 at its own count; your provider may count up to a few MB more per open tunnel.
@@ -92,7 +92,7 @@ measurements on your machine, not your provider's bill (see
 
 ## Install
 
-scrapescope is published on PyPI. It needs Python 3.11 or newer. `uv`
+Scrapescope is published on PyPI. It needs Python 3.11 or newer. `uv`
 downloads a suitable Python for you if needed; pipx uses its default Python
 unless you name one.
 
@@ -150,7 +150,7 @@ POSIX systems only.
 Each tunnel costs the meter two file descriptors. `run`, `serve` and `find`
 raise their own soft open-files limit to the hard limit (at most 65,536); `run`
 does it after starting your job, so the job keeps its usual limit. When the
-hard limit is low, scrapescope prints a note at start, and tunnels it cannot
+hard limit is low, Scrapescope prints a note at start, and tunnels it cannot
 open fail as `failed:local_limit` with a report warning saying the failures
 came from this machine. If you see it, raise the hard limit (`ulimit -Hn`,
 which can need administrator rights).
@@ -189,7 +189,7 @@ scrapescope find 'https://books.toscrape.com/catalogue/a-light-in-the-attic_1000
   inside a longer number; not counted") but never count as found.
 - `--direct` loads the page from your own connection ("sizing mode"). To go
   through your provider instead, leave it out and set `HTTPS_PROXY` (see
-  `run` below). In sizing mode scrapescope refuses loopback, private and
+  `run` below). In sizing mode Scrapescope refuses loopback, private and
   link-local addresses, this machine's own addresses and hosts on its own
   IPv6 link (/64) unless you pass `--allow-private-targets`. When the
   refused address is the target you typed, `find` reports a page load that
@@ -267,18 +267,18 @@ scrapescope run --upstream-from-env HTTPS_PROXY --budget 2GB --rate 3.00 -- pyth
 no default rate, so without `--rate` there are no costs in the report.
 
 `--upstream-from-env HTTPS_PROXY` keeps the job's routing as it was. The job
-gets `HTTPS_PROXY=http://127.0.0.1:<port>`, which points at scrapescope and
-carries no credentials, and scrapescope forwards each connection to the real
+gets `HTTPS_PROXY=http://127.0.0.1:<port>`, which points at Scrapescope and
+carries no credentials, and Scrapescope forwards each connection to the real
 proxy with your credentials. Other proxy variables (`*_proxy` in any case,
 `NO_PROXY` excepted) that name the same upstream, whatever the host's case,
 with or without the scheme, are replaced the same way, and so is any other
-variable whose value is exactly the upstream URL. scrapescope also adds
+variable whose value is exactly the upstream URL. Scrapescope also adds
 `SCRAPESCOPE_PROXY_URL`, `SCRAPESCOPE_AUTH_PROXY_URL`, `SCRAPESCOPE_EVENTS`,
 `SCRAPESCOPE_UPSTREAM_ID` (a salted fingerprint of the upstream's host and
 port; see below) and, with `--keep-urls`, `SCRAPESCOPE_KEEP_URLS`. Nothing
 else changes. If your job hands its proxy URL to something that does not run
 on this machine (a cloud browser session, a remote worker, a configuration
-file it writes out), keep that URL in a variable scrapescope does not touch:
+file it writes out), keep that URL in a variable Scrapescope does not touch:
 in the replaced variables it now reads `http://127.0.0.1:<port>`, which is
 useless elsewhere. A proxy variable that names your provider's host on
 another port or scheme, or its credentials on another host, is left alone
@@ -288,12 +288,12 @@ for `HTTP_PROXY`, `HTTPS_PROXY` or `ALL_PROXY` (either case) set to any other
 proxy, with a reason: for example, curl, Python and Node read
 `$https_proxy` before `$HTTPS_PROXY`, so a lowercase twin that points
 elsewhere takes their traffic around the meter. If you give neither
-`--upstream-from-env` nor `--direct`, scrapescope uses `HTTPS_PROXY` when it
+`--upstream-from-env` nor `--direct`, Scrapescope uses `HTTPS_PROXY` when it
 is set and otherwise stops with a message suggesting `--direct` (or naming
 `https_proxy`, `all_proxy`, `ALL_PROXY`, `HTTP_PROXY` or `http_proxy` when
 one of those is set instead).
 
-When the job exits, scrapescope prints a summary to stderr, writes
+When the job exits, Scrapescope prints a summary to stderr, writes
 `scrapescope-report.json` (`--out PATH` to change it, `--html PATH` for an
 offline HTML table) and exits with the job's own exit code, or with one of the
 codes in [docs/exit-codes.md](https://github.com/ipvolt/scrapescope/blob/main/docs/exit-codes.md).
@@ -305,14 +305,14 @@ scrapescope run --direct --env-all -- python my_scraper.py
 ```
 
 `--direct` sends traffic from your own connection, so you need no proxy
-account. `--env-all` points every proxy-aware client in the job at scrapescope:
+account. `--env-all` points every proxy-aware client in the job at Scrapescope:
 it sets `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY` and their lowercase forms,
 `NODE_USE_ENV_PROXY=1`, and adds `127.0.0.1,localhost,::1` to `NO_PROXY`.
 Under `--env-all`, the LLM API hosts listed in
 [direct.json](https://github.com/ipvolt/scrapescope/blob/main/src/scrapescope/catalog/direct.json) (for example
 `api.openai.com`) always go direct, never to a paid proxy, and are reported
 separately as "non-target". **They go direct even when you use `--env-all` with
-a provider: scrapescope resolves those names and connects from your own IP
+a provider: Scrapescope resolves those names and connects from your own IP
 address, for every client of the meter, a browser included.** `run` prints a
 note saying so, and the report warns when it happened. Cloud-storage hosts are
 not in the list, because buckets are often scrape targets. Without
@@ -360,10 +360,10 @@ context = browser.new_context(proxy={
 })
 ```
 
-The wrapped `new_context` replaces `server` with scrapescope's address and
-leaves the username and password unchanged; scrapescope forwards them to the
+The wrapped `new_context` replaces `server` with Scrapescope's address and
+leaves the username and password unchanged; Scrapescope forwards them to the
 provider it was started with. `launch(p.chromium, proxy={...})` rewrites a
-proxy you pass in the same way. So start scrapescope with the upstream variable
+proxy you pass in the same way. So start Scrapescope with the upstream variable
 pointing at that same provider endpoint; the URL in the variable can omit
 credentials if every context brings its own. Only a `server` with that
 provider's host and port is rerouted: `run` gives the job
@@ -382,7 +382,7 @@ would also show pages your real address. It is off by default because it
 changes what pages can do with WebRTC; `find` always sets it.
 
 Playwright turns off Chromium's HTTP cache whenever a browser or context has
-proxy credentials. Without them (plain `launch(p.chromium)`), scrapescope adds
+proxy credentials. Without them (plain `launch(p.chromium)`), Scrapescope adds
 your provider credentials itself and the cache stays on.
 
 ### Hooks for Requests and HTTPX
@@ -409,7 +409,7 @@ fail before any response; the plain `httpx_event_hooks()` dictionary cannot
 see those. Routing still comes from `HTTPS_PROXY`, which both libraries read by
 default. HTTPX 0.28 cannot send a plain `http://` request to an IPv6 literal
 through an HTTP proxy: it writes the target without brackets
-(`GET http://::1:8080/x`), which scrapescope refuses with `400 bad-request`.
+(`GET http://::1:8080/x`), which Scrapescope refuses with `400 bad-request`.
 It also rejects legacy IPv4 spellings such as `1.2.3.04` before sending.
 
 ### serve: a standing meter for hand-configured clients and CI
@@ -447,7 +447,7 @@ HTTPS_PROXY="$(cat ./proxy-url)" curl --compressed https://books.toscrape.com/  
 #   username ss-<token>~<provider-username>, password <provider-password>
 ```
 
-With `ss-<token>` alone, scrapescope uses the credentials from
+With `ss-<token>` alone, Scrapescope uses the credentials from
 `--upstream-from-env`. With `ss-<token>~<provider-username>`, it strips its own
 prefix and sends your username and password to the provider. The report is
 rewritten every 60 seconds and on exit; it keeps no byte timeline, which only
@@ -464,10 +464,10 @@ scrapescope report scrapescope-report.json --fail-on budget            # exit 86
 
 A report file is treated as untrusted input: it is validated against the
 schema first (an invalid file exits 2), and suggested fixes are rebuilt by
-this scrapescope from their id and the file's own figures (title, detection,
+this Scrapescope from their id and the file's own figures (title, detection,
 code and caveats) rather than shown as stored, in every format (`--format
 json` included), so a report from someone else cannot present its own code
-or text as scrapescope's.
+or text as Scrapescope's.
 
 ### Common options
 
@@ -485,7 +485,7 @@ or text as scrapescope's.
 | `--redact-hosts` | replace hosts with catalog ids or per-report keyed hashes |
 | `--keep-events` | (`run`) keep the private helper events file after the run and print its path |
 | `--fail-on bypass` | (`run`) exit 87 when helpers or hooks reported traffic the meter did not carry: a request to a host no tunnel carried, a request more than 2 s after every tunnel to its host had closed, or a host whose reported bytes exceed 1.5 × its tunnel bytes + 64 KiB (WebSocket payloads excluded). Clients without helpers or hooks stay invisible |
-| `--allow-private-targets` | (sizing mode) let scrapescope connect to loopback, private and link-local addresses, this machine's own addresses and hosts on its own IPv6 link, which it refuses by default |
+| `--allow-private-targets` | (sizing mode) let Scrapescope connect to loopback, private and link-local addresses, this machine's own addresses and hosts on its own IPv6 link, which it refuses by default |
 | `--quiet` | `run`, `serve`: no summary; errors and budget messages still go to stderr. `find`: no progress notes; the result still goes to stdout |
 | `--port N` | listening port; default random |
 
@@ -495,7 +495,7 @@ catalog entry states its trade-off.
 
 ## Which clients it covers
 
-| Client | How it reaches scrapescope | Totals | Attribution | `find` | Hooks |
+| Client | How it reaches Scrapescope | Totals | Attribution | `find` | Hooks |
 |---|---|---|---|---|---|
 | Playwright Python, Chromium | the helper (`launch()` or `proxy_settings()`) | yes | yes (helper) | yes | — |
 | Playwright JS, Puppeteer | a launch option: `proxy: {server: process.env.SCRAPESCOPE_PROXY_URL}` or `--proxy-server=$SCRAPESCOPE_PROXY_URL` | yes | planned for v1.1 | via the CLI | — |
@@ -510,13 +510,13 @@ catalog entry states its trade-off.
 "Totals" means tunnel-measured bytes per host. "Attribution" adds per-type
 allocation, units, success counts and the bypass check. A client that builds
 its own proxy URL can point at `$SCRAPESCOPE_PROXY_URL` and keep its own
-username and password; scrapescope passes them through to the provider it was
+username and password; Scrapescope passes them through to the provider it was
 started with. Hosted browsers (Browserbase, Steel and similar) are invisible to
 a local meter, because their proxy traffic leaves from the cloud.
 
 ## Honest limits
 
-- **Not a bill.** Totals are the bytes scrapescope wrote to and read from the
+- **Not a bill.** Totals are the bytes Scrapescope wrote to and read from the
   socket to your provider (tunnel-measured). Providers may count differently:
   with or without the CONNECT exchange, GB or GiB, with minimums or rounding,
   including or excluding failed requests. Costs are labelled "estimated
@@ -563,17 +563,17 @@ a local meter, because their proxy traffic leaves from the cloud.
 - **The bypass check sees only instrumented clients.** It catches requests to
   hosts no tunnel carried, requests after a host's tunnels had closed, and
   hosts whose reported bytes far exceed what their tunnels carried. Traffic
-  from a client without the helper or hooks that skips scrapescope cannot be
+  from a client without the helper or hooks that skips Scrapescope cannot be
   detected.
 - **`--env-all` with a provider sends LLM API calls from your own IP.** That is
-  its purpose (those calls should not go through a paid proxy), and scrapescope
+  its purpose (those calls should not go through a paid proxy), and Scrapescope
   says so at start and in the report.
 - **`find` looks at one page load.** It reports what it inspected and what it
   skipped (over the size cap, evicted, a worker without a session, WebSocket,
   binary, a challenged sub-request). It never says the page computed the value;
   a value not found may still be built by scripts. Its billed basis assumes a
   client that accepts the same compression as the browser.
-- **UDP is not metered.** scrapescope carries TCP only. A page's WebRTC can
+- **UDP is not metered.** Scrapescope carries TCP only. A page's WebRTC can
   send STUN over UDP straight from your machine, past the meter and your
   provider, and learn your addresses that way. `find` launches Chromium with
   WebRTC restricted to proxied connections; for your own jobs,
@@ -581,12 +581,12 @@ a local meter, because their proxy traffic leaves from the cloud.
   `--force-webrtc-ip-handling-policy=disable_non_proxied_udp` does the same.
 - **Not supported in v1:** Windows (untested), TLS to the proxy (`https://`
   proxy URLs), SOCKS4, UDP, and absolute-form `https://` requests to
-  scrapescope. `http://` proxies with CONNECT and `socks5://`/`socks5h://`
+  Scrapescope. `http://` proxies with CONNECT and `socks5://`/`socks5h://`
   proxies (hostnames resolved by the provider) are supported.
 
 ## Prior work
 
-scrapescope combines ideas that other tools already implement well. Each
+Scrapescope combines ideas that other tools already implement well. Each
 description below is from the project's own documentation as read on
 2026-09-23 and re-checked on 2026-09-24; they are checked again before each
 release.
@@ -603,7 +603,7 @@ release.
   bodies and WebSocket frames for a value you type, as plain text or a regular
   expression, and also offers copy as cURL. Both find *which* request carries
   a value, and a regular expression can cover some encodings by hand.
-  scrapescope adds, automatically: a ranking of the responses that hold your
+  Scrapescope adds, automatically: a ranking of the responses that hold your
   values (those with all of them first) by what a standalone fetch would move,
   including a TLS handshake; the common encoded variants of each value tried for you; flags
   for cookies, authorisation and tokens; and a cookie-less replay check
@@ -612,12 +612,12 @@ release.
   turns captured traffic into an OpenAPI description of a site's REST API, and
   **Integuru** ([github.com/Integuru-AI/Integuru](https://github.com/Integuru-AI/Integuru))
   uses an LLM agent to write integration code from a HAR file and a described
-  action. They document whole APIs. scrapescope answers a narrower question:
+  action. They document whole APIs. Scrapescope answers a narrower question:
   which single response already contains the values you name, and how large it
   is. It is deterministic and local, and needs no API key or model.
 - **apify/proxy-chain** ([github.com/apify/proxy-chain](https://github.com/apify/proxy-chain))
   is a Node.js proxy server library that chains to HTTP and SOCKS upstreams and
-  exposes per-connection traffic statistics. scrapescope's per-tunnel counting
+  exposes per-connection traffic statistics. Scrapescope's per-tunnel counting
   is the same kind of plumbing, packaged as a command that wraps your job and
   adds attribution, a budget and reports.
 - **Bright Data Proxy Manager** ([github.com/luminati-io/luminati-proxy](https://github.com/luminati-io/luminati-proxy))
@@ -630,14 +630,14 @@ release.
   statistics can differ from billing, and Bright Data also offers per-domain usage statistics for its
   network
   ([domain consumption API](https://docs.brightdata.com/api-reference/account-management-api/domain-consumption)).
-  scrapescope needs no account, adds attribution, a budget and `find`, and
+  Scrapescope needs no account, adds attribution, a budget and `find`, and
   never intercepts TLS.
 - **Scrapfly Proxy Saver** ([docs](https://scrapfly.io/docs/proxy-saver/getting-started))
   is a hosted, paid layer between your client and any proxy provider. It blocks
   and stubs unneeded resources, caches, enforces budgets and shows per-domain
   metrics; it terminates TLS (clients trust its certificate:
   [certificates](https://scrapfly.io/docs/proxy-saver/certificates)).
-  scrapescope measures and explains on your own
+  Scrapescope measures and explains on your own
   machine and leaves optimisation to you.
 - **NodeMaven** measured on 2026-08-19 (published by 2026-08-25, when the
   repository was created) that a fresh Chrome profile spent about 43 MB on
@@ -653,7 +653,7 @@ release.
   [HN discussion](https://news.ycombinator.com/item?id=41593410)), and
   [Puppeteer issue #7042](https://github.com/puppeteer/puppeteer/issues/7042)
   reported that about 90% of one user's proxy traffic went to Chromium `.crx`
-  package downloads. scrapescope's background catalog builds on these findings and
+  package downloads. Scrapescope's background catalog builds on these findings and
   credits them in each entry.
 - Some challenge-page patterns are adapted from **is-antibot**
   ([github.com/microlinkhq/is-antibot](https://github.com/microlinkhq/is-antibot),
