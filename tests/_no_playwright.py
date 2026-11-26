@@ -13,5 +13,5 @@ import sys
 for _name in [m for m in sys.modules if m == "playwright" or m.startswith("playwright.")]:
     del sys.modules[_name]
 for _name in ("playwright", "playwright.sync_api", "playwright.async_api", "playwright._impl",
-              "playwright._impl._network"):
+              "playwright._impl._network", "playwright._impl.network"):
     sys.modules[_name] = None  # type: ignore[assignment]

@@ -151,6 +151,7 @@ import base64
 import functools
 import hashlib
 import hmac
+import importlib
 import inspect
 import os
 import re
@@ -538,9 +539,8 @@ def _tag_routes() -> None:
     global _routes_tagged
     if _routes_tagged:
         return
-    try:
-        from playwright._impl._network import Route
-    except Exception:
+    Route = _route_class()
+    if Route is None:
         return
     try:
         for name, outcome in (("fulfill", "fulfilled"), ("abort", "aborted")):
@@ -551,6 +551,21 @@ def _tag_routes() -> None:
         _routes_tagged = True
     except Exception:
         pass
+
+
+def _route_class() -> Any:
+    """Playwright's internal Route class, or None.
+
+    Playwright 1.65 renamed the module from ``playwright._impl._network`` to
+    ``playwright._impl.network``. Without this lookup the wrappers silently stayed
+    off there, so routed aborts went unrecognised.
+    """
+    for module in ("playwright._impl.network", "playwright._impl._network"):
+        try:
+            return importlib.import_module(module).Route
+        except Exception:
+            continue
+    return None
 
 
 def _route_wrapper(original: Any, outcome: str) -> Any:
