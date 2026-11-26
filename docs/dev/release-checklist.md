@@ -55,10 +55,8 @@ same gate as a test.
    `tests/test_config.py::test_user_agent_is_honest`. *Done 2026-09-24.*
 8. Replace the README's relative links (`docs/...`, `NOTICE`, `SECURITY.md`,
    `src/scrapescope/catalog/...`) with absolute URLs to the repository, since
-   PyPI does not resolve relative links in the long description. *Open: the
-   package is installed from GitHub, where relative links work; do this
-   before the planned PyPI publication. `release_check.py` keeps reporting
-   them until then.*
+   PyPI does not resolve relative links in the long description. *Done
+   2026-09-25, before the first PyPI release.*
 9. The report schema's `$id` is `urn:scrapescope:report:v1`, which resolves
    nowhere by design. Replace it with the published schema URL only once that
    URL resolves.
@@ -73,8 +71,10 @@ same gate as a test.
     installs it as a uv tool, runs the suite without a browser, and runs the
     full suite with Playwright's Chromium and Node on one Linux and one macOS
     job. Once it passes, add the `Operating System :: POSIX :: Linux` and
-    Python version classifiers it covers to `pyproject.toml` (they list only
-    macOS and 3.12 today) and update claims M7 and O1 in docs/method.md.
+    Python version classifiers it covers to `pyproject.toml` and update claims
+    M7 and O1 in docs/method.md. *Done 2026-09-25: CI run 36045668332 passed
+    on every job; the classifiers now list Linux, macOS and Python 3.11 to
+    3.14.*
 
 ## Checks
 
@@ -95,3 +95,23 @@ same gate as a test.
     (with the is-antibot licence notice) is in both. Run
     `python scripts/release_check.py` again with the archives in `dist/`: it
     scans every member for URLs under an unreserved namespace.
+
+## Publishing
+
+19. **One-time setup (owner).** On pypi.org, add a pending Trusted Publisher
+    for the project `scrapescope`: owner `ipvolt`, repository `scrapescope`,
+    workflow `release.yml`, environment `pypi`. On test.pypi.org, add the same
+    with environment `testpypi`. In the repository settings, create the
+    GitHub environments `pypi` and `testpypi` (optionally with required
+    reviewers). No API token or repository secret is needed.
+20. **Test release.** Run the `release` workflow manually (Actions, release,
+    Run workflow) on the commit to release. It builds, runs `twine check` and
+    uploads to TestPyPI. Then install from TestPyPI in a clean environment:
+    `pip install --index-url https://test.pypi.org/simple/ --extra-index-url
+    https://pypi.org/simple/ 'scrapescope[browser]'`. TestPyPI, like PyPI,
+    accepts each version only once.
+21. **Release.** Publish a GitHub release whose tag is `v` plus the version in
+    `src/scrapescope/_version.py` (for example `v0.1.0`). The workflow refuses
+    a tag that does not match, then uploads to PyPI. After the upload, remove
+    `pypi.org/project/scrapescope` from `UNRESERVED_NAMESPACES` in
+    `scripts/release_check.py` (item 2).
